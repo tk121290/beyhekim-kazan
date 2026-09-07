@@ -167,6 +167,7 @@ class GameState(Enum):
     WAITING_FOR_PLAYER = auto()
     PROLOGUE           = auto()
     DUEL_LOBBY         = auto()
+    COUNTDOWN          = auto()
     RHAZI_TURN         = auto()
     PLAYER_TURN        = auto()
     RESOLUTION         = auto()
@@ -1118,6 +1119,9 @@ class Game:
         self.font_medium = pygame.font.Font(_fp, 10)   # Malzeme adı, notlar
         self.font_small  = pygame.font.Font(_fp, 8)    # Yardımcı bilgi
         self.font_tiny   = pygame.font.Font(_fp, 7)    # Timer, ipucu
+        self.font_countdown_num  = pygame.font.Font(_fp, 80) # 3-2-1 geri sayım büyük rakam
+        self.font_countdown_text = pygame.font.Font(_fp, 52) # "BASLA!" metni
+        self.font_countdown_sub  = pygame.font.Font(_fp, 13) # Geri sayım paneli başlığı
         self.font_symbol = pygame.font.SysFont("segoeuisymbol,segoeuiemoji,arial", 16)
         self.font_symbol_large = pygame.font.SysFont("segoeuisymbol,segoeuiemoji,arial", 28)
         self.font_body = pygame.font.SysFont("segoeui,arial,sans-serif", 15)
@@ -1238,6 +1242,8 @@ class Game:
         self.round_winner: str | None = None
         self.duel_match_winner: str | None = None
         self.lobby_countdown_start: float | None = None
+        self.countdown_start: float = 0.0
+        self.countdown_last_num: int | None = None
 
         # Sabuncuoğlu Şerefeddin Tersten Yaz Bölümü (Seviye > 12 rastgele meydan okuma)
         self.is_reverse_round = False
@@ -1278,7 +1284,7 @@ class Game:
                                 self._close_credits_view()
                             elif self.state == GameState.MODE_SELECT:
                                 running = False
-                            elif self.state in (GameState.WAITING_FOR_PLAYER, GameState.PROLOGUE, GameState.DUEL_LOBBY):
+                            elif self.state in (GameState.WAITING_FOR_PLAYER, GameState.PROLOGUE, GameState.DUEL_LOBBY, GameState.COUNTDOWN):
                                 self._return_to_mode_select()
                             elif self.state in (GameState.GAME_OVER, GameState.DUEL_MATCH_OVER):
                                 self._return_to_mode_select()
@@ -1469,13 +1475,126 @@ class Game:
         if self.mode == GameMode.DUEL:
             self.duel_round = 1
             self.duel_scores = {"player_1": 0, "player_2": 0}
-            self._start_rhazi_turn()
+            self._start_countdown()
         else:
             self.level = 1
             self.lives = 3
             self.combo = 0
             self.max_combo = 0
+            self._start_countdown()
+
+    def _start_countdown(self) -> None:
+        self.state = GameState.COUNTDOWN
+        self.countdown_start = time.monotonic()
+        self.countdown_last_num = None
+        if self.mode == GameMode.DUEL:
+            self.speak_bubble("Çıraklar hazır! İksir kazanı ısınıyor...", duration=3.8)
+        else:
+            self.speak_bubble("Hazırlan hekim namzedi! Kazan ısınıyor...", duration=3.8)
+        self._tick_countdown(force=True)
+
+    def _tick_countdown(self, force: bool = False) -> None:
+        now = time.monotonic()
+        elapsed = now - self.countdown_start
+        if elapsed < 1.0:
+            num = 3
+        elif elapsed < 2.0:
+            num = 2
+        elif elapsed < 3.0:
+            num = 1
+        elif elapsed < 3.8:
+            num = 0
+        else:
             self._start_rhazi_turn()
+            return
+
+        if force or num != self.countdown_last_num:
+            self.countdown_last_num = num
+            web_label = "BAŞLA!" if num == 0 else str(num)
+            self.network.send({
+                "type": "countdown",
+                "count": num,
+                "label": web_label,
+                "mode": self.mode.value,
+            })
+            if num > 0:
+                self.sounds.play("tick")
+            else:
+                self.sounds.play("level_up")
+
+    def _draw_countdown_overlay(self) -> None:
+        now = time.monotonic()
+        elapsed = now - self.countdown_start
+        num = self.countdown_last_num if self.countdown_last_num is not None else 3
+
+        # Dark vignette overlay
+        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        overlay.fill((10, 7, 5, 175))
+        self.pixel_surface.blit(overlay, (0, 0))
+
+        # Panel Card
+        card_w, card_h = 560, 280
+        cx, cy = WIDTH // 2, HEIGHT // 2 - 10
+        card = pygame.Rect(cx - card_w // 2, cy - card_h // 2, card_w, card_h)
+
+        # Shadow & card background
+        pygame.draw.rect(self.pixel_surface, (5, 3, 2), card.inflate(10, 10), border_radius=20)
+        pygame.draw.rect(self.pixel_surface, PANEL, card, border_radius=18)
+        pygame.draw.rect(self.pixel_surface, GOLD, card, 3, border_radius=18)
+        pygame.draw.rect(self.pixel_surface, BORDER, card.inflate(-10, -10), 1, border_radius=14)
+
+        # Decorative Selçuklu corner dots
+        for dx, dy in [(-1, -1), (1, -1), (-1, 1), (1, 1)]:
+            corner_x = cx + dx * (card_w // 2 - 20)
+            corner_y = cy + dy * (card_h // 2 - 20)
+            pygame.draw.circle(self.pixel_surface, GOLD, (corner_x, corner_y), 4)
+
+        # Sub header
+        header_surf = self.font_countdown_sub.render("DARUSSIFA KAZANI ISINIYOR", True, GOLD)
+        self.pixel_surface.blit(header_surf, (cx - header_surf.get_width() // 2, card.y + 28))
+
+        # Center number / text
+        label = "BASLA!" if num == 0 else str(num)
+        if num == 0:
+            f = self.font_countdown_text
+            col = GREEN_LT
+            subtext = "Şifa iksiri için doğru sırayı seçin!"
+        else:
+            f = self.font_countdown_num
+            col = GOLD_LT
+            if num == 3:
+                subtext = "Kazan ısınıyor, dikkatinizi toplayın..."
+            elif num == 2:
+                subtext = "Tabîb Ekmeleddin iksiri hazırlıyor..."
+            else:
+                subtext = "Ve başlıyoruz!"
+
+        # Number pulse / pop during first 0.22s of each second
+        sec_frac = (elapsed % 1.0) if num > 0 else (elapsed - 3.0)
+        scale_bump = 1.0
+        if 0 <= sec_frac < 0.22:
+            scale_bump = 1.15 - (sec_frac / 0.22) * 0.15
+
+        base_num_surf = f.render(label, True, col)
+        base_s_surf = f.render(label, True, SHADOW)
+
+        if scale_bump > 1.01:
+            bw, bh = base_num_surf.get_width(), base_num_surf.get_height()
+            nw, nh = int(bw * scale_bump), int(bh * scale_bump)
+            num_surf = pygame.transform.scale(base_num_surf, (nw, nh))
+            s_surf = pygame.transform.scale(base_s_surf, (nw, nh))
+        else:
+            num_surf = base_num_surf
+            s_surf = base_s_surf
+
+        mid_y = card.y + (card_h // 2) - (num_surf.get_height() // 2) + 2
+        self.pixel_surface.blit(s_surf, (cx - num_surf.get_width() // 2 + 3, mid_y + 3))
+        self.pixel_surface.blit(num_surf, (cx - num_surf.get_width() // 2, mid_y))
+
+        # Sub text
+        sub_surf = self.font_body_bold.render(subtext, True, TEXT_DIM)
+        self.pixel_surface.blit(sub_surf, (cx - sub_surf.get_width() // 2, card.bottom - 44))
+
 
     def _open_credits_view(self) -> None:
         if self.state != GameState.CREDITS_VIEW:
@@ -1577,7 +1696,7 @@ class Game:
                     self.players[pid]["connected"] = False
                     self.players[pid]["ready"] = False
                 if self.mode == GameMode.DUEL:
-                    if self.state in (GameState.DUEL_LOBBY, GameState.PROLOGUE, GameState.RHAZI_TURN, GameState.PLAYER_TURN):
+                    if self.state in (GameState.DUEL_LOBBY, GameState.PROLOGUE, GameState.COUNTDOWN, GameState.RHAZI_TURN, GameState.PLAYER_TURN):
                         self.state = GameState.WAITING_FOR_PLAYER
                         self.wait_started = time.monotonic()
                         self.speak_bubble("Bir çırak ayrıldı. Yeni çırak bekleniyor...", duration=4.0)
@@ -1771,10 +1890,9 @@ class Game:
         self.was_reverse_last_round = False
         if hasattr(self, "sabuncuoglu"):
             self.sabuncuoglu.reset()
-        self.state        = GameState.WAITING_FOR_PLAYER
         self.phase_started = time.monotonic()
         self.last_message  = "Yeni oyun hazırlanıyor..."
-        self._start_rhazi_turn()
+        self._start_countdown()
 
     def _return_to_qr_screen(self) -> None:
         self.network.stop()
@@ -1933,6 +2051,10 @@ class Game:
                 if now - self.lobby_countdown_start >= 3.0:
                     self.lobby_countdown_start = None
                     self._start_prologue()
+            return
+
+        if self.state == GameState.COUNTDOWN:
+            self._tick_countdown()
             return
 
         if self.state == GameState.RHAZI_TURN:
@@ -2559,7 +2681,9 @@ class Game:
         elif self.mode == GameMode.DUEL:
             self._draw_duel_sprites()
             self._draw_duel_hud()
-            if self.state == GameState.RHAZI_TURN:
+            if self.state == GameState.COUNTDOWN:
+                self._draw_countdown_overlay()
+            elif self.state == GameState.RHAZI_TURN:
                 p1_seq = self.player_sequences.get("player_1", self.sequence)
                 p2_seq = self.player_sequences.get("player_2", self.sequence)
                 p1_mat = p1_seq[self.phase_cursor] if self.phase_cursor < len(p1_seq) else (p1_seq[-1] if p1_seq else "civa")
@@ -2578,7 +2702,9 @@ class Game:
         else:
             self._draw_sprites()
             self._draw_game_header()
-            if self.state == GameState.RHAZI_TURN:
+            if self.state == GameState.COUNTDOWN:
+                self._draw_countdown_overlay()
+            elif self.state == GameState.RHAZI_TURN:
                 material = self.sequence[self.phase_cursor]
                 self._draw_material_animation(material)
                 self._draw_material_label(material, 50, 560)

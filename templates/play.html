@@ -451,6 +451,82 @@
       flex-direction: column;
       overflow: hidden;
     }
+    .credits-modal-card {
+      max-width: 900px;
+    }
+
+    /* ── Geri Sayım Ekranı (3-2-1 BAŞLA!) ── */
+    .countdown-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1500;
+      background: rgba(10, 7, 5, 0.88);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      transition: opacity 0.25s ease;
+    }
+    .countdown-overlay.hidden {
+      display: none;
+    }
+    .countdown-card {
+      width: 100%;
+      max-width: 380px;
+      background: radial-gradient(circle at center, #2e1d10 0%, #170d07 100%);
+      border: 2px solid var(--gold);
+      border-radius: 24px;
+      box-shadow: 0 0 35px rgba(212, 168, 72, 0.35), inset 0 0 20px rgba(212, 168, 72, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 32px 24px;
+    }
+    .countdown-sub {
+      font-family: Georgia, serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--gold-lt);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+    .countdown-num {
+      font-family: 'Press Start 2P', monospace, sans-serif;
+      font-size: 4.5rem;
+      color: #ffd166;
+      text-shadow: 0 0 20px rgba(255, 209, 102, 0.85), 0 4px 10px rgba(0, 0, 0, 0.95);
+      line-height: 1.1;
+      margin: 14px 0;
+      transform-origin: center center;
+    }
+    .countdown-num.bump {
+      animation: countPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .countdown-num.start-text {
+      font-size: 2.3rem;
+      color: #48e588;
+      text-shadow: 0 0 25px rgba(72, 229, 136, 0.85), 0 4px 10px rgba(0, 0, 0, 0.95);
+      letter-spacing: 0.06em;
+    }
+    .countdown-hint {
+      font-family: Georgia, serif;
+      font-size: 0.92rem;
+      color: #e6d8c5;
+      font-style: italic;
+      margin-top: 4px;
+      min-height: 1.3em;
+    }
+    @keyframes countPop {
+      0% { transform: scale(0.4); opacity: 0.2; }
+      60% { transform: scale(1.22); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
     .modal-header {
       padding: 12px 14px;
       border-bottom: 1px solid var(--border);
@@ -995,9 +1071,9 @@
       border: 2px solid var(--gold);
       border-radius: 14px;
       overflow: hidden;
-      box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.95), 0 6px 24px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 168, 72, 0.25);
-      background: radial-gradient(ellipse at center, #1b1009 0%, #080503 100%);
-      height: 380px;
+      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.45), 0 6px 24px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 168, 72, 0.25);
+      background: radial-gradient(ellipse at center, #3a2414 0%, #1b1009 100%);
+      height: min(520px, 62vh);
     }
     .cinema-credits-wrapper::before {
       content: "";
@@ -1005,8 +1081,8 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 52px;
-      background: linear-gradient(to bottom, #080503 30%, rgba(8, 5, 3, 0));
+      height: 30px;
+      background: linear-gradient(to bottom, rgba(12, 7, 4, 0.72), rgba(12, 7, 4, 0));
       z-index: 5;
       pointer-events: none;
     }
@@ -1016,8 +1092,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 52px;
-      background: linear-gradient(to top, #080503 30%, rgba(8, 5, 3, 0));
+      height: 30px;
+      background: linear-gradient(to top, rgba(12, 7, 4, 0.72), rgba(12, 7, 4, 0));
       z-index: 5;
       pointer-events: none;
     }
@@ -1038,8 +1114,9 @@
     .cinema-credits-crawl {
       width: 100%;
       text-align: center;
-      padding: 30px 16px 360px 16px;
+      padding: 30px 34px 360px 34px;
       box-sizing: border-box;
+      background: rgba(42, 25, 14, 0.34);
       transform: translateZ(0);
       will-change: transform;
     }
@@ -1055,7 +1132,7 @@
       margin-top: 22px;
       margin-bottom: 4px;
       letter-spacing: .08em;
-      text-shadow: 0 1px 4px #000;
+      text-shadow: 0 1px 3px #000;
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
     .cinema-role-title {
@@ -1064,22 +1141,22 @@
       color: #ffffff;
       margin: 6px 0 3px 0;
       letter-spacing: .04em;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.75);
     }
     .cinema-role-desc {
       font-size: .82rem;
-      color: #dfceb8;
+      color: #f1dfc5;
       font-style: italic;
       font-weight: 500;
       margin-bottom: 8px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.7);
     }
     .cinema-name {
       font-size: .98rem;
       color: #ffffff;
       line-height: 1.75;
       font-weight: 600;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.95);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.75);
     }
     .cinema-divider {
       width: 80px;
@@ -1089,6 +1166,17 @@
     }
 
     .hidden { display: none !important; }
+
+    @media (max-width: 640px) {
+      .credits-modal-card {
+        max-width: 100%;
+      }
+
+      .cinema-credits-crawl {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1300,11 +1388,18 @@
       </button>
     </div>
   </div>
+<!-- ── 3-2-1 Geri Sayım Ekranı (Oyun Başlarken) ── -->
+<div class="countdown-overlay hidden" id="countdownOverlay">
+  <div class="countdown-card">
+    <div class="countdown-sub">DÂRÜŞŞİFA KAZANI ISINIYOR</div>
+    <div id="countdownNumber" class="countdown-num">3</div>
+    <div id="countdownHint" class="countdown-hint">Kazan ısınıyor, dikkatinizi toplayın...</div>
+  </div>
 </div>
 
 <!-- ── Erciyes Kulüp, Künye & Portalı ── -->
 <div class="modal-backdrop hidden" id="creditsModal" style="z-index: 1200;">
-  <div class="modal-card" style="max-width: 580px;">
+  <div class="modal-card credits-modal-card">
     <div class="modal-header">
       <div class="modal-title-wrap">
         <h2 style="color: var(--gold-lt); font-size: 1.15rem;">🏛️ Anadolu Tıp Tarihi Kulübü & Gürgen Ekibi</h2>
@@ -1672,6 +1767,48 @@
   const openEkmeleddinBioBtn       = document.getElementById('openEkmeleddinBioBtn');
   const openEkmeleddinBioBtnDuel   = document.getElementById('openEkmeleddinBioBtnDuel');
   const openBioModalFromCreditsBtn = document.getElementById('openBioModalFromCreditsBtn');
+
+  // ── 3-2-1 Geri Sayım Elemanları ──
+  const countdownOverlay      = document.getElementById('countdownOverlay');
+  const countdownNumber       = document.getElementById('countdownNumber');
+  const countdownHint         = document.getElementById('countdownHint');
+
+  function showCountdown(count, label) {
+    if (!countdownOverlay || !countdownNumber) return;
+    countdownOverlay.classList.remove('hidden');
+
+    countdownNumber.classList.remove('bump');
+    void countdownNumber.offsetWidth; // CSS reflow
+    countdownNumber.classList.add('bump');
+
+    if (count === 0) {
+      countdownNumber.classList.add('start-text');
+      countdownNumber.textContent = label || 'BAŞLA!';
+      if (countdownHint) countdownHint.textContent = 'Şifa iksiri için doğru sırayı seçin!';
+      playVictoryChime();
+      if (navigator.vibrate) {
+        try { navigator.vibrate([70, 40, 90]); } catch (e) {}
+      }
+    } else {
+      countdownNumber.classList.remove('start-text');
+      countdownNumber.textContent = label || String(count);
+      if (countdownHint) {
+        if (count === 3) countdownHint.textContent = 'Kazan ısınıyor, dikkatinizi toplayın...';
+        else if (count === 2) countdownHint.textContent = 'Tabîb Ekmeleddin iksiri hazırlıyor...';
+        else if (count === 1) countdownHint.textContent = 'Ve başlıyoruz!';
+      }
+      playTone(550 + (3 - count) * 160, 'sine', 0.12, 0.15);
+      if (navigator.vibrate) {
+        try { navigator.vibrate(45); } catch (e) {}
+      }
+    }
+  }
+
+  function hideCountdown() {
+    if (countdownOverlay) {
+      countdownOverlay.classList.add('hidden');
+    }
+  }
 
 
   // Düello Durumu
@@ -2650,8 +2787,33 @@
       playTone(600, 'sine', 0.2, 0.1);
     }
 
+    // ── Geri Sayım (3-2-1 BAŞLA!) Mesajı ──
+    if (msg.type === 'countdown') {
+      const count = msg.count;
+      const label = msg.label || (count === 0 ? 'BAŞLA!' : String(count));
+
+      // Açık olabilecek pencereleri kapat
+      if (prologueModal) {
+        prologueModal.classList.add('hidden');
+        if (prologueStartBtn) {
+          prologueStartBtn.disabled = false;
+          prologueStartBtn.style.opacity = '1';
+          prologueStartBtn.textContent = '▶ BAŞLA';
+        }
+      }
+      if (gameOverModal) gameOverModal.classList.add('hidden');
+      if (creditsModal) creditsModal.classList.add('hidden');
+      stopCreditsScroll();
+      if (duelLobbyModal) duelLobbyModal.classList.add('hidden');
+      if (duelMatchOverModal) duelMatchOverModal.classList.add('hidden');
+
+      showCountdown(count, label);
+    }
+
     // ── Oyun Turu Mesajları ──
     if (msg.type === 'round_started') {
+      hideCountdown();
+      if (countdownOverlay) countdownOverlay.classList.add('hidden');
       isReverseRound = !!msg.is_reverse;
       const sabBanner = document.getElementById('sabuncuogluBanner');
       if (isReverseRound) {
