@@ -1222,10 +1222,20 @@
     <span class="duel-emblem" id="oppDuelEmblem">🜍</span>
   </div>
   <div class="duel-progress-container">
-    <div class="duel-track">
-      <div id="duelOppFill" class="duel-fill" style="width: 0%"></div>
+    <div style="display: flex; gap: 8px; width: 100%;">
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+        <div class="duel-track">
+          <div id="myDuelFill" class="duel-fill" style="width: 0%; background: linear-gradient(90deg, #2ecc71, #f0c86e);"></div>
+        </div>
+        <span id="myDuelStatusText" class="duel-track-label" style="text-align: left; color: #a8d5ba;">Sen: 0/0</span>
+      </div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+        <div class="duel-track">
+          <div id="duelOppFill" class="duel-fill" style="width: 0%; background: linear-gradient(90deg, #c84b3c, #f0c86e);"></div>
+        </div>
+        <span id="duelOppStatusText" class="duel-track-label" style="text-align: right; color: #e6a59b;">Rakip: 0/0</span>
+      </div>
     </div>
-    <span id="duelOppStatusText" class="duel-track-label">Rakip: 0/0</span>
   </div>
 </div>
 
@@ -1388,6 +1398,7 @@
       </button>
     </div>
   </div>
+</div>
 <!-- ── 3-2-1 Geri Sayım Ekranı (Oyun Başlarken) ── -->
 <div class="countdown-overlay hidden" id="countdownOverlay">
   <div class="countdown-card">
@@ -1728,6 +1739,8 @@
   const oppDuelEmblem         = document.getElementById('oppDuelEmblem');
   const duelOppFill           = document.getElementById('duelOppFill');
   const duelOppStatusText     = document.getElementById('duelOppStatusText');
+  const myDuelFill            = document.getElementById('myDuelFill');
+  const myDuelStatusText      = document.getElementById('myDuelStatusText');
 
   const stunOverlay           = document.getElementById('stunOverlay');
   const duelLobbyModal        = document.getElementById('duelLobbyModal');
@@ -2096,6 +2109,7 @@
       const btn = document.createElement('button');
       btn.className = 'mat-btn';
       btn.dataset.button = el.id;
+      btn.dataset.id = el.id;
 
       const r = el.color[0], g = el.color[1], b = el.color[2];
       const r2 = Math.floor(r * 0.6), g2 = Math.floor(g * 0.6), b2 = Math.floor(b * 0.6);
@@ -2638,6 +2652,8 @@
   // Yeniden Düello Butonu
   if (duelRematchBtn) {
     duelRematchBtn.addEventListener('click', () => {
+      if (creditsModal) creditsModal.classList.add('hidden');
+      if (typeof stopCreditsScroll === 'function') stopCreditsScroll();
       if (duelMatchOverModal) duelMatchOverModal.classList.add('hidden');
       if (duelLobbyModal) duelLobbyModal.classList.remove('hidden');
       myReady = false;
@@ -2848,8 +2864,12 @@
           renderDuelLives(myDuelLivesVal, oppDuelLivesVal);
           updateLives(myDuelLivesVal);
         }
+        if (myDuelFill) myDuelFill.style.width = '0%';
+        if (myDuelStatusText) myDuelStatusText.textContent = 'Sen: 0';
         if (duelOppFill) duelOppFill.style.width = '0%';
         if (duelOppStatusText) duelOppStatusText.textContent = 'Rakip: 0';
+        isStunned = false;
+        if (stunOverlay) stunOverlay.classList.add('hidden');
       } else {
         isDuelMode = false;
         if (duelOpponentBar) duelOpponentBar.classList.add('hidden');
@@ -2923,8 +2943,11 @@
 
     // ── Düello İlerleme & Hata Bildirimleri ──
     if (msg.type === 'duel_progress') {
-      if (msg.player_id !== myPlayerId) {
-        const pct = msg.total > 0 ? (msg.cursor / msg.total * 100).toFixed(1) : 0;
+      const pct = msg.total > 0 ? (msg.cursor / msg.total * 100).toFixed(1) : 0;
+      if (msg.player_id === myPlayerId) {
+        if (myDuelFill) myDuelFill.style.width = pct + '%';
+        if (myDuelStatusText) myDuelStatusText.textContent = `Sen: ${msg.cursor}/${msg.total}`;
+      } else {
         if (duelOppFill) duelOppFill.style.width = pct + '%';
         if (duelOppStatusText) duelOppStatusText.textContent = `Rakip: ${msg.cursor}/${msg.total}`;
         playBubbleTone(450, 520, 0.06);
@@ -2964,6 +2987,7 @@
       if (!msg.target || msg.target === myPlayerId) {
         statusEl.textContent = msg.message || '⚠️ Rakip tamamladı! Canını korumak için acele et!';
         statusEl.className = 'status error';
+        updateTimer(3.5, 3.5);
         playFlaskCrack();
         if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
       }
@@ -3064,6 +3088,9 @@
     }
 
     if (msg.type === 'duel_lobby_reset') {
+      if (creditsModal) creditsModal.classList.add('hidden');
+      if (typeof stopCreditsScroll === 'function') stopCreditsScroll();
+      if (prologueModal) prologueModal.classList.add('hidden');
       if (duelMatchOverModal) duelMatchOverModal.classList.add('hidden');
       if (duelLobbyModal) duelLobbyModal.classList.remove('hidden');
       myReady = false;
@@ -3078,6 +3105,12 @@
       renderDuelStars(0, 0);
       renderDuelLives(3, 3);
       updateLives(3);
+      if (myDuelFill) myDuelFill.style.width = '0%';
+      if (myDuelStatusText) myDuelStatusText.textContent = 'Sen: 0/0';
+      if (duelOppFill) duelOppFill.style.width = '0%';
+      if (duelOppStatusText) duelOppStatusText.textContent = 'Rakip: 0/0';
+      isStunned = false;
+      if (stunOverlay) stunOverlay.classList.add('hidden');
     }
 
     if (msg.type === 'round_success') {
@@ -3120,7 +3153,9 @@
       statusEl.className = 'status error';
       if (navigator.vibrate) navigator.vibrate([120, 60, 160]);
       timerTotal = msg.total || timerTotal;
-      updateTimer(timerTotal, timerTotal);
+      if (!isDuelMode) {
+        updateTimer(timerTotal, timerTotal);
+      }
     }
 
     if (msg.type === 'life_gained') {

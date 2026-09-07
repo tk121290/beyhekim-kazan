@@ -1475,6 +1475,19 @@ class Game:
         if self.mode == GameMode.DUEL:
             self.duel_round = 1
             self.duel_scores = {"player_1": 0, "player_2": 0}
+            self.player_lives = {"player_1": 3, "player_2": 3}
+            self.player_cursors = {"player_1": 0, "player_2": 0}
+            self.player_completed = {"player_1": False, "player_2": False}
+            self.player_sequences = {"player_1": [], "player_2": []}
+            self.first_completer = None
+            self.grace_period_end = None
+            self.player_stuns = {"player_1": 0.0, "player_2": 0.0}
+            self.round_winner = None
+            self.duel_match_winner = None
+            self.is_reverse_round = False
+            self.was_reverse_last_round = False
+            if hasattr(self, "sabuncuoglu"):
+                self.sabuncuoglu.reset()
             self._start_countdown()
         else:
             self.level = 1
@@ -2028,15 +2041,20 @@ class Game:
             self._spawn_particles(random.randint(170, 930), random.randint(185, 520), (160, 128, 80), 1)
         self._update_particles()
 
-        # Timer tick → telefona saniyede bir gönder
+        # Timer tick → telefona periyodik gönder
         if self.state == GameState.PLAYER_TURN:
-            remaining = max(0.0, self.player_duration - (now - self.phase_started))
-            if not hasattr(self, "_last_tick") or now - self._last_tick >= 1.0:
+            if self.mode == GameMode.DUEL and self.grace_period_end is not None:
+                remaining = max(0.0, self.grace_period_end - now)
+                tot = 3.5
+            else:
+                remaining = max(0.0, self.player_duration - (now - self.phase_started))
+                tot = self.player_duration
+            if not hasattr(self, "_last_tick") or now - self._last_tick >= 0.5:
                 self._last_tick = now
                 self.network.send({
                     "type": "timer_tick",
                     "remaining": round(remaining, 1),
-                    "total": round(self.player_duration, 1),
+                    "total": round(tot, 1),
                 })
 
         # Gemini ipucu — arka plandan gelen sonucu konuşma balonunda göster
@@ -2531,6 +2549,13 @@ class Game:
                 "player_lives": self.player_lives,
                 "is_reverse": getattr(self, "is_reverse_round", False),
                 "message": f"Yanlış malzeme! 1 Can kaybettin ({rem_lives} can kaldı). Doğru malzemeyi tekrar dene!{rev_note}",
+            })
+            self.network.send({
+                "type": "stunned",
+                "target": player_id,
+                "player_id": player_id,
+                "duration": 1.2,
+                "message": "Yanlış malzeme! 1.2 saniye sersemledin.",
             })
             # Rakibe bildir
             self.network.send({
@@ -3548,11 +3573,24 @@ class Game:
             self._text_center("YARIŞIYOR...", self.font_tiny, GOLD, p2_box.centerx, status_y + 9)
 
     def _draw_duel_timer_bar(self, remaining: float) -> None:
-        ratio = max(0.0, remaining / self.player_duration)
         cx = WIDTH // 2
         bw = 480
         bar_rect = pygame.Rect(cx - bw // 2, 630, bw, 12)
         pygame.draw.rect(self.pixel_surface, PANEL_LT, bar_rect, border_radius=6)
+
+        if self.grace_period_end is not None:
+            grace_rem = max(0.0, self.grace_period_end - time.monotonic())
+            ratio = max(0.0, min(1.0, grace_rem / 3.5))
+            fill_w = int(bar_rect.width * ratio)
+            if fill_w > 0:
+                pygame.draw.rect(self.pixel_surface, RED_LT,
+                                 pygame.Rect(bar_rect.x, bar_rect.y, fill_w, bar_rect.height),
+                                 border_radius=6)
+            secs = max(0.0, round(grace_rem, 1))
+            self._text_center(f"SON FIRSAT: {secs:.1f}s", self.font_tiny, RED_LT, cx, 648)
+            return
+
+        ratio = max(0.0, remaining / self.player_duration)
         fill_w = int(bar_rect.width * ratio)
         if fill_w > 0:
             color = GREEN if ratio > 0.4 else (GOLD if ratio > 0.2 else RED)
@@ -3732,7 +3770,7 @@ class Game:
         if not self.bubble_text or now - self.bubble_started >= self.bubble_duration:
             return
 
-        bx = 220
+        bx = 360 if self.mode == GameMode.DUEL else 220
         words = self.bubble_text.split()
         lines = []
         cur_line = []
@@ -3823,7 +3861,7 @@ class Game:
         bh = header_h + len(lines) * line_h + pad_y * 2
 
         # Sabuncuoğlu'nun anlık x pozisyonuna göre konumlandır
-        bx = int(self.sabuncuoglu.x)
+        bx = 760 if self.mode == GameMode.DUEL else int(self.sabuncuoglu.x)
         box_x = int(bx - bw // 2)
         box_x = max(10, min(WIDTH - bw - 10, box_x))
         # Sabuncuoğlu'nun başı (floor_y - 170 civarı)

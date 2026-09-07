@@ -591,20 +591,28 @@ async def room_socket(websocket: WebSocket, room_id: str) -> None:
             await safe_send(old, {"type": "error", "message": "Replaced by a new game session."})
         room["desktop"] = websocket
         log.info("Desktop connected — room %s", clean_id)
-        await safe_send(websocket, {"type": "desktop_connected", "room_id": clean_id})
+        players = room.get("players", {})
+        player_summary = {pid: {"name": p["name"], "emblem": p["emblem"], "ready": p["ready"]} for pid, p in players.items()}
+        await safe_send(websocket, {
+            "type": "desktop_connected",
+            "room_id": clean_id,
+            "player_count": len(players),
+            "players": player_summary,
+            "mode": room.get("mode", "undecided"),
+        })
 
     else:  # mobile
         players = room.setdefault("players", {})
         sockets = room.setdefault("sockets", {})
 
-        room_mode = room.get("mode", "single")
+        room_mode = room.get("mode", "undecided")
 
-        # Tek kişilik modda 1'den fazla oyuncu bağlanamaz
-        if room_mode == "single" and len(players) >= 1:
-            log.info("Room %s is in single player mode and already has a player", clean_id)
+        # Tek kişilik mod sadece oyun aktif olarak tek kişilik başlatıldıysa 2. oyuncuyu reddeder
+        if room_mode == "single" and len(players) >= 1 and room.get("started", False):
+            log.info("Room %s is actively playing in single player mode", clean_id)
             await safe_send(websocket, {
                 "type": "error",
-                "message": "Bu oda Tek Kişilik Mod olarak başlatıldı (Oda dolu).",
+                "message": "Bu oda Tek Kişilik Mod olarak devam ediyor (Oda dolu).",
             })
             await websocket.close(code=4003)
             return
@@ -766,11 +774,20 @@ async def room_socket(websocket: WebSocket, room_id: str) -> None:
                 msg_type = message.get("type")
                 if msg_type == "mode_set":
                     room["mode"] = message.get("mode", "single")
+                    room["started"] = False
                     log.info("Room %s mode explicitly set to %s", clean_id, room["mode"])
+                    await broadcast_mobile(room, {
+                        "type": "mode_changed",
+                        "mode": room["mode"],
+                    })
                 elif msg_type == "mode_changed":
                     room["mode"] = message.get("mode", "single")
                     await broadcast_mobile(room, message)
                 else:
+                    if msg_type in ("round_started", "player_turn"):
+                        room["started"] = True
+                    elif msg_type in ("game_over", "duel_match_over", "duel_lobby_reset"):
+                        room["started"] = False
                     await broadcast_mobile(room, message)
 
     except WebSocketDisconnect:
