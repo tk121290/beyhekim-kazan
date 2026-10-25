@@ -2,8 +2,10 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Tabîb Ekmeleddin'in Kazanı (Bey Hekim)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
   <style>
     /* ── Değişkenler ── */
     :root {
@@ -23,60 +25,78 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
     body {
-      min-height: 100dvh;
       background:
         radial-gradient(ellipse at 10% 0%,   #5a321a 0, transparent 38%),
         radial-gradient(ellipse at 90% 100%, #1a2f25 0, transparent 38%),
-        linear-gradient(160deg, #0e0b09, #281a10);
+        linear-gradient(160deg, #0e0b09, #24160d);
       color: var(--ink);
-      font-family: 'Georgia', serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Georgia, serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 14px 10px 20px;
-      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      padding: max(4px, env(safe-area-inset-top)) 6px max(6px, env(safe-area-inset-bottom));
+      gap: 4px;
     }
 
     header {
       width: 100%;
-      max-width: 540px;
+      max-width: 520px;
+      height: 36px;
+      flex-shrink: 0;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 4px;
+      padding: 0 2px;
+      min-width: 0;
     }
     .logo {
-      font-size: clamp(1.0rem, 4.2vw, 1.35rem);
-      color: var(--gold);
-      line-height: 1.2;
+      font-size: clamp(0.76rem, 3.2vw, 0.94rem);
+      font-weight: 800;
+      color: var(--gold-lt);
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex-shrink: 1;
     }
     .logo small {
-      display: block;
-      font-size: .68em;
-      color: var(--muted);
-      font-style: italic;
+      display: none;
     }
     .header-right {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      flex-shrink: 0;
+      min-width: 0;
     }
     /* Kombo Rozeti */
     .combo-pill {
       display: inline-flex;
       align-items: center;
       gap: 2px;
-      font-size: .72rem;
-      font-weight: 700;
+      font-size: .70rem;
+      font-weight: 800;
       color: #fff;
       background: linear-gradient(135deg, #b83d16, #6b2209);
       border: 1px solid var(--gold);
-      border-radius: 14px;
-      padding: 3px 7px;
-      box-shadow: 0 0 10px rgba(235, 106, 40, 0.45);
-      transition: transform .2s, opacity .2s;
+      border-radius: 12px;
+      padding: 2px 6px;
+      box-shadow: 0 0 8px rgba(235, 106, 40, 0.45);
     }
     .combo-pill.bump {
       animation: combo-pop .3s ease-out;
@@ -90,12 +110,13 @@
     .lives-badge {
       display: flex;
       align-items: center;
-      gap: 2px;
-      font-size: 1.15rem;
-      background: #211810cc;
+      gap: 1px;
+      font-size: 0.85rem;
+      background: #211810dd;
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 2px 7px;
+      border-radius: 14px;
+      padding: 2px 5px;
+      flex-shrink: 0;
     }
     .flask {
       transition: transform .25s, opacity .25s, filter .25s;
@@ -114,26 +135,26 @@
       75% { transform: translateY(2px) rotate(10deg); }
     }
 
-    /* Kodeks Butonu */
+    /* Üst Bar Butonları */
     .codex-btn {
       position: relative;
-      background: #211810cc;
+      background: #24180fdd;
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 10px;
       color: var(--gold-lt);
-      font: 600 .70rem Georgia, serif;
-      padding: 4px 8px;
+      font: 700 .68rem -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 4px 6px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
-      transition: all .2s;
+      gap: 2px;
+      flex-shrink: 0;
+      transition: all .15s;
     }
-    .codex-btn:hover, .codex-btn:active {
+    .codex-btn:active {
       background: var(--gold);
       color: #110d0b;
-      border-color: var(--gold-lt);
-      transform: scale(0.96);
+      transform: scale(0.95);
     }
     .badge-dot {
       width: 6px;
@@ -144,80 +165,49 @@
     }
 
     .room-badge {
-      font-size: .72rem;
-      letter-spacing: .12em;
-      color: var(--gold-lt);
-      text-align: right;
-      flex-shrink: 0;
-    }
-    .room-badge span {
-      display: block;
-      font-size: .6rem;
-      color: var(--muted);
+      display: none;
     }
 
     .category-tabs {
-      display: flex;
-      gap: 5px;
-      overflow-x: auto;
-      padding: 2px 0 6px 0;
-      margin-bottom: 6px;
-      scrollbar-width: none;
-    }
-    .category-tabs::-webkit-scrollbar { display: none; }
-    .cat-btn {
-      flex-shrink: 0;
-      background: #211810cc;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      color: var(--muted);
-      font: 600 .70rem Georgia, serif;
-      padding: 4px 9px;
-      cursor: pointer;
-      transition: all .2s;
-    }
-    .cat-btn.active {
-      background: var(--gold);
-      color: #110d0b;
-      border-color: var(--gold-lt);
-      font-weight: 700;
-      box-shadow: 0 0 8px rgba(212, 168, 72, 0.4);
+      display: none;
     }
 
     .status-wrap {
       width: 100%;
-      max-width: 540px;
-      margin-bottom: 8px;
+      max-width: 520px;
+      flex-shrink: 0;
     }
     .status {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
+      gap: 6px;
+      padding: 5px 8px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      background: #211810cc;
-      font-size: .88rem;
-      color: var(--gold);
-      transition: color .3s, border-color .3s;
+      background: #1c130ce6;
+      font-size: .76rem;
+      font-weight: 600;
+      color: var(--gold-lt);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .status::before {
       content: '';
-      flex: 0 0 8px;
-      width: 8px; height: 8px;
+      flex: 0 0 7px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: var(--gold);
       box-shadow: 0 0 8px var(--gold);
     }
-    .status.ready   { color: var(--green-lt); border-color: #3d7054; }
+    .status.ready   { color: var(--green-lt); border-color: #3d7054; background: rgba(20, 45, 32, 0.9); }
     .status.ready::before { background: var(--green); box-shadow: 0 0 10px var(--green); }
-    .status.error   { color: var(--red-lt);   border-color: #7a3228; }
+    .status.error   { color: var(--red-lt);   border-color: #7a3228; background: rgba(48, 18, 15, 0.9); }
     .status.error::before { background: var(--red); box-shadow: 0 0 10px var(--red); }
     .status.reverse {
       color: #e0b0ff;
       border-color: #9b5de5;
       background: linear-gradient(135deg, #2b1830, #1a0f20);
-      animation: reverse-pulse 2s infinite alternate;
     }
     .status.reverse::before {
       background: #c77dff;
@@ -228,57 +218,27 @@
       border-color: #f77f00;
       background: linear-gradient(135deg, #301824, #1c0e18);
       font-weight: 700;
-      animation: reverse-pulse 1.4s infinite alternate;
     }
     .status.reverse-ready::before {
       background: #ffb703;
       box-shadow: 0 0 12px #ffb703;
     }
-    @keyframes reverse-pulse {
-      0%   { box-shadow: 0 0 6px rgba(199, 125, 255, 0.3); }
-      100% { box-shadow: 0 0 16px rgba(247, 127, 0, 0.5); }
-    }
 
-    .sabuncuoglu-banner {
-      width: 100%;
-      max-width: 540px;
-      margin-bottom: 8px;
-      padding: 9px 14px;
-      border-radius: 10px;
-      border: 1.5px solid #d6a848;
-      background: linear-gradient(135deg, #18281f, #0f1a14);
-      box-shadow: 0 0 12px rgba(214, 168, 72, 0.35);
-      animation: reverse-pulse 2s infinite alternate;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      transition: all 0.3s ease;
-    }
-    .sabuncuoglu-banner.hidden { display: none; }
-    .sab-badge {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #ffd56b;
-      letter-spacing: 0.04em;
-    }
-    .sab-text {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #e4f4ea;
-      line-height: 1.3;
+    .sabuncuoglu-banner, .recipe-banner {
+      display: none !important;
     }
 
     .timer-wrap {
       width: 100%;
-      max-width: 540px;
-      margin-bottom: 8px;
+      max-width: 520px;
+      flex-shrink: 0;
       display: none;
     }
-    .timer-wrap.visible { display: flex; align-items: center; gap: 8px; }
+    .timer-wrap.visible { display: flex; align-items: center; gap: 6px; }
     .timer-bar-bg {
       flex: 1;
-      height: 7px;
-      background: #2e1e10;
+      height: 5px;
+      background: #2a1b10;
       border-radius: 4px;
       overflow: hidden;
     }
@@ -287,115 +247,147 @@
       width: 100%;
       border-radius: 4px;
       background: var(--green);
-      transition: width .9s linear, background .4s;
+      transition: width .35s linear, background .3s;
     }
     .timer-bar-fill.warn  { background: var(--gold); }
     .timer-bar-fill.urgent { background: var(--red); }
     .timer-label {
-      font-size: .72rem;
-      color: var(--muted);
-      min-width: 26px;
+      font-size: .66rem;
+      font-weight: 700;
+      color: var(--gold-lt);
+      min-width: 22px;
       text-align: right;
     }
 
     main {
       width: 100%;
-      max-width: 540px;
+      max-width: 520px;
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* ── Buton Izgarası ── */
+    /* ── Ekrana Tam Oturan Dinamik Cevher Izgarası ── */
     .buttons-container {
       flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
       overflow-y: auto;
-      padding-right: 2px;
+      overflow-x: hidden;
+      scrollbar-width: none;
     }
+    .buttons-container::-webkit-scrollbar { display: none; }
+
     .buttons {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: minmax(42px, 1fr);
+      gap: 5px;
     }
-    .buttons.many-cols {
-      grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
-    }
+    .buttons.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .buttons.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .buttons.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .buttons.cols-5 { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(42px, 1fr); }
+
     .buttons.disabled button {
-      opacity: .35;
+      opacity: .55;
       pointer-events: none;
-      filter: grayscale(50%);
-      transform: scale(.98);
+      filter: saturate(0.75);
+    }
+    .buttons.disabled button.flash {
+      opacity: 1 !important;
+      filter: brightness(1.35) saturate(1.3) !important;
+      transform: scale(1.03) !important;
+      border: 2px solid #fff5c0 !important;
+      box-shadow: 0 0 22px rgba(255, 215, 90, 0.95) !important;
+      z-index: 5;
     }
 
     button.mat-btn {
       position: relative;
-      min-height: 85px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      min-height: 40px;
+      height: 100%;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 12px;
+      border: 1.5px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
       color: #fff8e8;
-      font: 700 .95rem Georgia, serif;
+      font: 700 .80rem -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       cursor: pointer;
-      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.3);
-      transition: transform .12s, filter .12s;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.38), 0 2px 6px rgba(0,0,0,0.35);
+      transition: transform .12s, filter .12s, box-shadow .15s;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.85);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 8px 4px;
+      padding: 3px 4px;
+      gap: 1px;
     }
     button.mat-btn::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(160deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+      background: linear-gradient(160deg, rgba(255,255,255,0.18) 0%, transparent 55%);
       pointer-events: none;
     }
-    button.mat-btn:active {
-      transform: translateY(2px) scale(.97);
-      filter: brightness(1.2);
+    button.mat-btn:active, button.mat-btn.pressed {
+      transform: scale(.94);
+      filter: brightness(1.25);
     }
-    button.mat-btn.pressed {
-      animation: btn-press .2s ease-out;
-    }
-    @keyframes btn-press {
-      40% { transform: translateY(2px) scale(.95); filter: brightness(1.25); }
+    button.mat-btn.flash {
+      border: 2px solid #fff5c0;
+      box-shadow: 0 0 20px rgba(255, 215, 90, 0.9);
+      filter: brightness(1.3);
     }
 
     .symbol {
       display: block;
-      font-size: 1.6rem;
-      font-weight: 400;
-      margin-bottom: 3px;
-      text-shadow: 0 0 10px rgba(255,255,255,0.4);
+      font-size: clamp(1.05rem, 3.4vw, 1.45rem);
+      line-height: 1.05;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
     }
     .mat-name {
-      font-size: .85rem;
-      letter-spacing: .02em;
+      width: 100%;
+      font-size: clamp(.64rem, 2.4vw, .78rem);
+      font-weight: 700;
+      letter-spacing: 0;
       text-align: center;
+      line-height: 1.1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0 2px;
     }
 
     #resetBtn {
       display: none;
       width: 100%;
-      min-height: 48px;
-      margin-top: 10px;
+      max-width: 100%;
+      min-height: 36px;
+      padding: 7px 10px;
+      margin-top: 4px;
+      flex-shrink: 0;
       background: linear-gradient(135deg, #8a4430, #5e2818);
       border: 1px solid #c06040;
-      border-radius: 10px;
-      font-size: .95rem;
+      border-radius: 9px;
+      font-size: .82rem;
+      font-weight: 700;
       color: #fde8d8;
       cursor: pointer;
     }
     #resetBtn.visible { display: block; }
 
     .unlocked-note {
-      font-size: .68rem;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 6px;
+      display: none;
     }
 
     /* Tarihi Reçete Banner */
@@ -433,7 +425,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 12px;
+      padding: 8px;
+      box-sizing: border-box;
       transition: opacity .25s ease;
     }
     .modal-backdrop.hidden {
@@ -441,8 +434,8 @@
     }
     .modal-card {
       width: 100%;
-      max-width: 520px;
-      max-height: 88vh;
+      max-width: min(500px, calc(100vw - 16px));
+      max-height: calc(100dvh - 16px);
       background: linear-gradient(175deg, #241910, #160e09);
       border: 1px solid #825832;
       border-radius: 14px;
@@ -450,9 +443,10 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      box-sizing: border-box;
     }
     .credits-modal-card {
-      max-width: 900px;
+      max-width: min(500px, calc(100vw - 16px));
     }
 
     /* ── Geri Sayım Ekranı (3-2-1 BAŞLA!) ── */
@@ -797,108 +791,181 @@
     .stat-val { font-size: 1.05rem; font-weight: 700; color: #fff8e8; }
 
     .nickname-form {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
       text-align: left;
-      background: #19100a;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: linear-gradient(145deg, #2d1c0e, #180f07);
+      border: 2px solid var(--gold-lt);
+      border-radius: 12px;
       padding: 9px 10px;
+      box-shadow: 0 0 18px rgba(248, 213, 104, 0.28);
+      animation: score-box-glow 1.4s infinite alternate;
+      overflow: hidden;
     }
-    .nickname-label { font-size: .70rem; color: var(--gold-lt); display: block; margin-bottom: 5px; }
-    .nickname-input-group { display: flex; gap: 6px; }
+    @keyframes score-box-glow {
+      from { box-shadow: 0 0 10px rgba(248, 213, 104, 0.22); border-color: var(--gold); }
+      to   { box-shadow: 0 0 24px rgba(248, 213, 104, 0.55); border-color: #ffe082; }
+    }
+    .score-step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      max-width: 100%;
+      background: linear-gradient(90deg, #ffd166, #f4a261);
+      color: #120b06;
+      font-size: .65rem;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 14px;
+      margin-bottom: 5px;
+      letter-spacing: .02em;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.2;
+      animation: badge-bounce 1s ease-in-out infinite alternate;
+    }
+    @keyframes badge-bounce {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-2px); }
+    }
+    .nickname-label { font-size: .74rem; font-weight: 800; color: #fff8e8; display: block; margin-bottom: 5px; line-height: 1.25; }
+    .nickname-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
     .nickname-input-group input {
-      flex: 1;
-      background: #100a06;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 8px;
-      color: var(--ink);
-      font-size: .85rem;
-      font-family: inherit;
-    }
-    .nickname-input-group input:focus { outline: none; border-color: var(--gold); }
-    .save-score-btn {
-      background: var(--gold);
-      color: #110d0b;
-      border: none;
-      border-radius: 6px;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+      background: #0e0805;
+      border: 1.5px solid var(--gold);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #ffffff;
+      font-size: .88rem;
       font-weight: 700;
-      font-size: .78rem;
-      padding: 0 12px;
-      cursor: pointer;
-      transition: filter .2s;
+      font-family: inherit;
+      text-align: center;
     }
-    .save-score-btn:active { filter: brightness(1.2); }
-    .save-status-msg { font-size: .65rem; color: var(--green-lt); display: block; margin-top: 4px; min-height: 14px; }
+    .nickname-input-group input::placeholder { color: #b8a48a; font-weight: 500; }
+    .nickname-input-group input:focus { outline: none; border-color: #4ade80; box-shadow: 0 0 10px rgba(74, 222, 128, 0.35); }
+    .save-score-btn {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      background: linear-gradient(135deg, #2ecc71, #1b8a48);
+      color: #ffffff;
+      border: 1.5px solid #86efac;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: .84rem;
+      padding: 9px 12px;
+      cursor: pointer;
+      white-space: normal;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 3px 12px rgba(46, 204, 113, 0.45);
+      transition: transform .15s, filter .2s;
+    }
+    .save-score-btn:active { transform: scale(0.97); filter: brightness(1.15); }
+    .save-status-msg { font-size: .70rem; font-weight: 700; color: var(--green-lt); display: block; margin-top: 4px; min-height: 14px; text-align: center; }
 
-    .summary-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .summary-actions { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; width: 100%; }
     .leaderboard-link-btn {
-      display: block;
-      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 7px 8px;
       background: #211810;
       border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--gold-lt);
-      font-size: .80rem;
+      font-size: .75rem;
+      line-height: 1.25;
+      white-space: normal;
+      word-break: break-word;
       text-decoration: none;
     }
     .modal-reset-btn {
-      padding: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 8px 8px;
       background: linear-gradient(135deg, #8a4430, #5e2818);
       border: 1px solid #c06040;
       border-radius: 8px;
       color: #fff;
       font-weight: 700;
-      font-size: .85rem;
+      font-size: .78rem;
+      line-height: 1.25;
+      white-space: normal;
+      word-break: break-word;
       cursor: pointer;
     }
 
     /* ── 1v1 Düello (Versus Mode) Stilleri ── */
     .duel-opp-bar {
       width: 100%;
-      max-width: 540px;
+      max-width: 520px;
+      flex-shrink: 0;
       background: linear-gradient(135deg, #24140c, #160d08);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 12px;
-      margin-bottom: 8px;
+      border-radius: 10px;
+      padding: 5px 10px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      gap: 4px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.45);
     }
     .duel-player-box {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: .85rem;
+      gap: 4px;
+      font-size: .75rem;
     }
     .duel-player-box.you { color: var(--gold-lt); }
     .duel-player-box.opp { color: #d0a080; }
-    .duel-emblem { font-size: 1.1rem; }
-    .duel-name { font-weight: 700; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .duel-lives { font-size: .85rem; letter-spacing: 1px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
-    .duel-stars { color: var(--gold); letter-spacing: 1px; font-size: .85rem; font-weight: 700; }
+    .duel-emblem { font-size: .95rem; }
+    .duel-name { font-weight: 700; max-width: 72px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .duel-lives { font-size: .72rem; letter-spacing: 0px; }
+    .duel-stars { color: var(--gold); font-size: .75rem; font-weight: 800; }
     .duel-vs-badge {
       background: #3d2014;
       border: 1px solid var(--gold);
-      border-radius: 10px;
+      border-radius: 8px;
       color: var(--gold-lt);
-      font-size: .65rem;
+      font-size: .60rem;
       font-weight: 800;
-      padding: 2px 7px;
+      padding: 1px 6px;
     }
     .duel-progress-container {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 3px;
-      margin-top: 3px;
+      gap: 2px;
     }
     .duel-track {
       width: 100%;
-      height: 7px;
+      height: 5px;
       background: #140d09;
       border: 1px solid #4a2818;
       border-radius: 4px;
@@ -910,7 +977,7 @@
       transition: width .2s ease-out;
     }
     .duel-track-label {
-      font-size: .65rem;
+      font-size: .60rem;
       color: var(--muted);
       text-align: right;
     }
@@ -1065,15 +1132,68 @@
       border-radius: 16px;
     }
 
-    /* Sinematik Film Sonu Kayan Jenerik (Credits Crawl) */
+    /* Sinematik Film Sonu Kayan Jenerik (Credits Crawl) - Mobil Uyumlu */
     .cinema-credits-wrapper {
       position: relative;
-      border: 2px solid var(--gold);
-      border-radius: 14px;
+      border: 1.5px solid var(--gold);
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.45), 0 6px 24px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 168, 72, 0.25);
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.65);
       background: radial-gradient(ellipse at center, #3a2414 0%, #1b1009 100%);
-      height: min(520px, 62vh);
+      height: clamp(115px, 19dvh, 175px);
+      flex-shrink: 0;
+    }
+    /* Canlı Skor Dashboard Kartları (Mobil & Oyun İçi) */
+    .dash-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .dash-stat-box {
+      background: #170f09;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 4px;
+      text-align: center;
+      min-width: 0;
+    }
+    .dash-stat-box .lbl { font-size: .55rem; color: var(--muted); display: block; font-weight: 700; }
+    .dash-stat-box .val { font-size: .96rem; color: var(--gold-lt); font-weight: 900; }
+    .dash-scores-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 17dvh;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .dash-score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #18100a;
+      border: 1px solid #3c2515;
+      border-radius: 8px;
+      padding: 6px 9px;
+      font-size: .76rem;
+    }
+    .dash-score-row.top-rank {
+      border-color: var(--gold);
+      background: linear-gradient(135deg, #281a0f, #18100a);
+    }
+    .dash-rank { font-weight: 900; width: 26px; text-align: left; font-size: .88rem; }
+    .dash-player { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dash-player strong { color: #fff; display: block; font-size: .78rem; }
+    .dash-player small { color: var(--gold); font-size: .62rem; }
+    .dash-meta { display: flex; align-items: center; gap: 6px; font-weight: 800; color: var(--gold-lt); }
+    .dash-lvl-pill {
+      background: rgba(212, 168, 72, 0.18);
+      border: 1px solid var(--gold);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: .75rem;
+      color: var(--gold-lt);
     }
     .cinema-credits-wrapper::before {
       content: "";
@@ -1167,14 +1287,130 @@
 
     .hidden { display: none !important; }
 
+    /* ── Canlı Mobil Dârüşşifa & Kazan Sahnesi (Canvas) ── */
+    .stage-wrap {
+      width: 100%;
+      max-width: 520px;
+      flex-shrink: 0;
+      position: relative;
+      border-radius: 11px;
+      border: 1.5px solid var(--border);
+      background: #140d09;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65), inset 0 0 14px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .stage-wrap.watch-mode {
+      border-color: var(--gold);
+      box-shadow: 0 4px 18px rgba(212, 168, 72, 0.4), inset 0 0 14px rgba(0, 0, 0, 0.45);
+    }
+    .stage-wrap.surge-mode {
+      border-color: var(--red-lt);
+      box-shadow: 0 0 20px rgba(235, 90, 70, 0.65);
+    }
+    #stageCanvas {
+      display: block;
+      width: 100%;
+      max-height: clamp(120px, 24dvh, 200px);
+      height: auto;
+      aspect-ratio: 880 / 360;
+      object-fit: cover;
+      image-rendering: auto;
+    }
+
+    /* ── Telefondan Mod Seçimi Kartları ── */
+    .mode-choice-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+    .mode-choice-btn {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      text-align: left;
+      background: linear-gradient(145deg, #27190f, #170e08);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 12px;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .mode-choice-btn:hover, .mode-choice-btn:active {
+      border-color: var(--gold-lt);
+      background: linear-gradient(145deg, #332012, #1f130b);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(212, 168, 72, 0.28);
+    }
+    .mode-choice-icon {
+      font-size: 1.85rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(212, 168, 72, 0.14);
+      border: 1px solid rgba(212, 168, 72, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .mode-choice-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .mode-choice-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--gold-lt);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .mode-choice-desc {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
     @media (max-width: 640px) {
       .credits-modal-card {
-        max-width: 100%;
+        max-width: calc(100vw - 12px);
       }
 
       .cinema-credits-crawl {
-        padding-left: 16px;
-        padding-right: 16px;
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      button.mat-btn {
+        min-height: 38px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .codex-btn span:not(.badge-dot) {
+        display: none;
+      }
+      .codex-btn {
+        padding: 4px 7px;
+        font-size: .82rem;
+      }
+      .lives-badge {
+        font-size: .78rem;
+        padding: 2px 5px;
+      }
+      .buttons.cols-4,
+      .buttons.cols-5 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
   </style>
@@ -1183,7 +1419,7 @@
 <header>
   <div class="logo">
     Tabîb Ekmeleddin
-    <small>Bey Hekim · Tıp </small>
+    <small>Bey Hekim · Tıp & Simya</small>
   </div>
   <div class="header-right">
     <button class="sound-btn" id="soundBtn" title="Sesi Aç/Kapat">🔊</button>
@@ -1195,6 +1431,15 @@
       <span class="flask" id="flask2">🧪</span>
       <span class="flask" id="flask3">🧪</span>
     </div>
+    <button class="codex-btn" id="openModeSelectBtn" title="Oyun Modu Seç (Tek Kişilik / 1v1)">
+      🎮 <span>Mod</span>
+    </button>
+    <button class="codex-btn" id="openLeaderboardModalBtn" title="Tek Kişilik Oyuncu Skorları Dashboard">
+      🏆 <span>Skor</span>
+    </button>
+    <button class="codex-btn" id="openQrStandModalBtn" title="Stand & Tablet QR Kodu">
+      📱 <span>QR</span>
+    </button>
     <button class="codex-btn" id="openCodexBtn" title="Kitâbü'l-Esrâr Kodeksi & Başarımlar">
       📖 <span>Kodeks</span>
       <span class="badge-dot hidden" id="codexDot"></span>
@@ -1205,6 +1450,11 @@
     </div>
   </div>
 </header>
+
+<!-- Canlı Dârüşşifa & Bey Hekim Kazan Sahnesi -->
+<div class="stage-wrap" id="stageWrap">
+  <canvas id="stageCanvas" width="880" height="360"></canvas>
+</div>
 
 <!-- 1v1 Düello Rakip İlerleme Çubuğu -->
 <div id="duelOpponentBar" class="duel-opp-bar hidden">
@@ -1323,57 +1573,135 @@
   </div>
 </div>
 
-<!-- ── Oyun Sonu Özet Modal'ı ── -->
-<div class="modal-backdrop hidden" id="gameOverModal">
-  <div class="modal-card" style="max-width: 440px; text-align: center;">
-    <div class="modal-header">
-      <div class="modal-title-wrap" style="width: 100%;">
-        <h2 style="color: var(--red-lt);">Oyun Sona Erdi</h2>
+<!-- ── Oyun Sonu Özet & Canlı Skor Dashboard Modal'ı ── -->
+<div class="modal-backdrop hidden" id="gameOverModal" style="z-index: 1500;">
+  <div class="modal-card" style="text-align: center;">
+    <div class="modal-header" style="padding: 9px 12px; flex-shrink: 0;">
+      <div class="modal-title-wrap" style="width: 100%; min-width: 0;">
+        <h2 style="color: var(--red-lt); font-size: .98rem;">🏁 Oyun Sona Erdi · Skor Özeti</h2>
         <span class="modal-sub">Tabîb Ekmeleddin'in Dârüşşifası</span>
       </div>
       <button class="modal-close" id="closeGameOverBtn" aria-label="Kapat">✕</button>
     </div>
-    <div class="modal-body" style="padding: 16px 18px; display: flex; flex-direction: column; gap: 14px;">
-      <div class="summary-badge">
-        <span class="summary-level-label">ULAŞILAN SEVİYE</span>
-        <div class="summary-level-val" id="summaryLevel">01</div>
-        <div class="summary-title-val" id="summaryTitle">Çırak Tabip 🕯️</div>
-      </div>
-      <div class="summary-stats">
-        <div class="summary-stat-box">
-          <span class="stat-label">EN YÜKSEK KOMBO</span>
-          <span class="stat-val" id="summaryCombo">🔥 —</span>
+    <div class="modal-body" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; overflow-x: hidden;">
+      <div style="display: flex; gap: 6px; align-items: stretch;">
+        <div class="summary-badge" style="flex: 1.05; padding: 7px 6px; min-width: 0;">
+          <span class="summary-level-label">ULAŞILAN SEVİYE</span>
+          <div class="summary-level-val" id="summaryLevel" style="font-size: 1.65rem; line-height: 1.1;">01</div>
+          <div class="summary-title-val" id="summaryTitle" style="font-size: .74rem;">Çırak Tabip 🕯️</div>
         </div>
-        <div class="summary-stat-box">
-          <span class="stat-label">AÇILAN CEVHER</span>
-          <span class="stat-val" id="summaryElements">0/30</span>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0;">
+          <div class="summary-stat-box" style="padding: 5px 4px;">
+            <span class="stat-label">EN YÜKSEK KOMBO</span>
+            <span class="stat-val" id="summaryCombo" style="font-size: .88rem;">🔥 —</span>
+          </div>
+          <div class="summary-stat-box" style="padding: 5px 4px;">
+            <span class="stat-label">AÇILAN CEVHER</span>
+            <span class="stat-val" id="summaryElements" style="font-size: .88rem;">0/30</span>
+          </div>
         </div>
       </div>
+
       <div class="nickname-form">
-        <label for="playerNickname" class="nickname-label">Hekim Adın (Liderlik Tablosu):</label>
+        <span class="score-step-badge">👇 ADINI YAZIP SKOR TABLOSUNA KAYDET! 👇</span>
+        <label for="playerNickname" class="nickname-label">🏆 Hekim Adını Yaz (Stand & Skor Ekranında Görünür):</label>
         <div class="nickname-input-group">
-          <input type="text" id="playerNickname" maxlength="24" placeholder="İsmini yaz..." />
-          <button id="saveScoreBtn" class="save-score-btn">Kaydet</button>
+          <input type="text" id="playerNickname" maxlength="24" placeholder="Adını buraya yaz..." />
+          <button id="saveScoreBtn" class="save-score-btn">🏆 SKORU KAYDET</button>
         </div>
         <span id="saveStatusMsg" class="save-status-msg"></span>
       </div>
-      <div class="summary-actions" style="display: flex; flex-direction: column; gap: 8px;">
-        <button id="openCreditsBtn" type="button" class="leaderboard-link-btn" style="background: #2b1c10; border: 1px solid var(--gold); color: var(--gold-lt);">
-          🏛️ ERÜ Anadolu Tıp Tarihi Topluluğu & Künye
-        </button>
-        <div style="display: flex; gap: 8px;">
-          <button id="openEkmeleddinBioBtn" type="button" class="modal-reset-btn" style="flex: 1; font-size: .75rem; background: #1f140c; border: 1px solid var(--border); color: var(--ink);">
-            📜 Tabîb Ekmeleddin Kimdir?
-          </button>
-          <a href="/download/tabib_ekmeleddin_kimdir.pdf" download class="leaderboard-link-btn" style="flex: 1; font-size: .75rem; text-decoration: none; padding: 10px; background: #1f140c; border: 1px solid var(--border); color: var(--gold-lt); text-align: center;">
-            📥 Tezhipli PDF
-          </a>
+
+      <!-- Oyun Sonu Gömülü Tek Kişilik Oyuncu Skorları Dashboard'u -->
+      <div style="background: #140d08; border: 1.5px solid var(--gold); border-radius: 10px; padding: 7px 9px; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 5px;">
+          <strong style="font-size: .74rem; color: var(--gold-lt);">🏆 Canlı Oyuncu Skorları</strong>
+          <button type="button" id="openLeaderboardFromGameOverBtn" style="background: linear-gradient(135deg, var(--gold), #9c6e1e); border: none; color: #110d0b; font-weight: 900; border-radius: 6px; padding: 4px 8px; font-size: .68rem; cursor: pointer; flex-shrink: 0;">📊 Tüm Skorlar</button>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <a href="/leaderboard" target="_blank" class="leaderboard-link-btn" style="flex: 1;">🏆 Skor Tablosu</a>
-          <button id="modalResetBtn" class="modal-reset-btn" style="flex: 1;">↻ Yeni Oyun</button>
+        <div class="dash-scores-list" id="gameOverScoresList">
+          <div style="font-size: .72rem; color: var(--muted); text-align: center; padding: 8px;">Skorlar yükleniyor...</div>
         </div>
       </div>
+
+      <div class="summary-actions" style="display: flex; flex-direction: column; gap: 5px;">
+        <button id="openCreditsBtn" type="button" class="leaderboard-link-btn" style="background: #2b1c10; border: 1px solid var(--gold); color: var(--gold-lt); padding: 8px; font-weight: 700; cursor: pointer;">
+          🏛️ Emeği Geçenler & ERÜ Kulüp Künyesi
+        </button>
+        <div style="display: flex; gap: 6px; width: 100%;">
+          <button id="openEkmeleddinBioBtn" type="button" class="modal-reset-btn" style="flex: 1; font-size: .72rem; padding: 7px 6px; background: #1f140c; border: 1px solid var(--border); color: var(--ink);">
+            📜 Bey Hekim Kimdir?
+          </button>
+          <a href="/download/tabib_ekmeleddin_kimdir.pdf" target="_blank" rel="noopener" class="leaderboard-link-btn" style="flex: 1; font-size: .72rem; text-decoration: none; padding: 7px 6px; background: #1f140c; border: 1px solid var(--gold); color: var(--gold-lt);">
+            📄 Tezhipli PDF Aç
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Sabit Alt Aksiyon Çubuğu (Ekrandan Taşmaz) -->
+    <div style="display: flex; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--border); background: #18100a; flex-shrink: 0;">
+      <button type="button" id="openQrFromGameOverBtn" class="leaderboard-link-btn" style="flex: 1; cursor: pointer; font-size: .74rem; padding: 8px 6px;">📱 Stand QR</button>
+      <button id="modalResetBtn" class="modal-reset-btn" style="flex: 1.3; font-size: .78rem; padding: 8px 8px;">↻ Yeni Oyun Başlat</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Telefondan Oyun Modu Seçimi Modalı ── -->
+<div class="modal-backdrop hidden" id="modeSelectModal" style="z-index: 1400;">
+  <div class="modal-card" style="max-width: 460px; max-height: 92dvh;">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-badge" style="color: var(--gold); font-size: .68rem; font-weight: 800; letter-spacing: .08em;">⚗️ KONYA DÂRÜŞŞİFASI · MOBİL OYUN</span>
+        <h2 style="color: var(--gold-lt); font-size: 1.15rem;">Oyun Modunu Seçin</h2>
+        <span class="modal-sub">Tüm sahne ve animasyonlar doğrudan telefonunuzda!</span>
+      </div>
+      <button class="modal-close" id="closeModeSelectBtn" aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+      <div class="mode-choice-grid">
+        <button type="button" class="mode-choice-btn" id="selectSingleModeBtn">
+          <div class="mode-choice-icon">🧪</div>
+          <div class="mode-choice-info">
+            <div class="mode-choice-title">
+              <span>Tek Kişilik Macera</span>
+              <span style="font-size: .72rem; color: var(--green-lt);">▶ Başla</span>
+            </div>
+            <div class="mode-choice-desc">
+              100 seviyeli kadim iksir yolculuğu. Bey Hekim'in kazana attığı cevherleri izle ve adını skor tablosuna yazdır!
+            </div>
+          </div>
+        </button>
+
+        <button type="button" class="mode-choice-btn" id="selectDuelModeBtn">
+          <div class="mode-choice-icon">⚔️</div>
+          <div class="mode-choice-info">
+            <div class="mode-choice-title">
+              <span>1v1 Çırak Düellosu</span>
+              <span style="font-size: .72rem; color: var(--gold);">2 Oyuncu</span>
+            </div>
+            <div class="mode-choice-desc">
+              İki telefonla canlı hız ve hafıza düellosu! QR okutan diğer çırakla otomatik eşleş veya oda koduyla katıl.
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 2px;">
+        <button type="button" id="openLeaderboardFromModeBtn" class="leaderboard-link-btn" style="background: #26180e; border: 1px solid var(--gold); color: var(--gold-lt); font-size: .74rem; cursor: pointer; font-weight: 700; padding: 8px 6px;">
+          🏆 Oyuncu Skorları
+        </button>
+        <button type="button" id="openQrStandFromModeBtn" class="leaderboard-link-btn" style="background: #26180e; border: 1px solid var(--gold); color: var(--gold-lt); font-size: .74rem; cursor: pointer; font-weight: 700; padding: 8px 6px;">
+          📱 Stand QR & Web
+        </button>
+        <button type="button" id="openCreditsFromModeBtn" class="leaderboard-link-btn" style="background: #1c120b; border: 1px solid var(--border); color: var(--ink); font-size: .73rem; cursor: pointer; padding: 8px 6px;">
+          🏛️ Emeği Geçenler
+        </button>
+        <button type="button" id="openBioFromModeBtn" class="leaderboard-link-btn" style="background: #1c120b; border: 1px solid var(--border); color: var(--ink); font-size: .73rem; cursor: pointer; padding: 8px 6px;">
+          📜 Bey Hekim Kimdir?
+        </button>
+      </div>
+      <a href="/download/tabib_ekmeleddin_kimdir.pdf" target="_blank" rel="noopener" class="leaderboard-link-btn" style="width: 100%; text-align: center; font-size: .74rem; border-color: var(--gold); color: var(--gold-lt); padding: 8px;">
+        📄 Tabîb Ekmeleddin Kimdir? (Tezhipli PDF Aç)
+      </a>
     </div>
   </div>
 </div>
@@ -1396,6 +1724,9 @@
       <button type="button" id="prologueStartBtn" class="duel-ready-btn" style="background: linear-gradient(135deg, #d4a848, #996d1c); font-size: 1.05rem; padding: 14px; color: #110d0b; font-weight: 800; letter-spacing: .08em; box-shadow: 0 0 15px rgba(212, 168, 72, 0.4);">
         ▶ BAŞLA
       </button>
+      <button type="button" id="prologueBackToModeBtn" class="leaderboard-link-btn" style="background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: .76rem; padding: 8px; cursor: pointer;">
+        ← Oyun Modunu Değiştir (Tek Kişilik / 1v1)
+      </button>
     </div>
   </div>
 </div>
@@ -1408,36 +1739,41 @@
   </div>
 </div>
 
-<!-- ── Erciyes Kulüp, Künye & Portalı ── -->
-<div class="modal-backdrop hidden" id="creditsModal" style="z-index: 1200;">
+<!-- ── Erciyes Kulüp, Emeği Geçenler Künyesi & PDF Portalı (Mobil Ekran Uyumlu) ── -->
+<div class="modal-backdrop hidden" id="creditsModal" style="z-index: 1650;">
   <div class="modal-card credits-modal-card">
-    <div class="modal-header">
-      <div class="modal-title-wrap">
-        <h2 style="color: var(--gold-lt); font-size: 1.15rem;">🏛️ Anadolu Tıp Tarihi Kulübü & Gürgen Ekibi</h2>
-        <span class="modal-sub">Tabîb Ekmeleddin'in Kazanı Projesi</span>
+    <div class="modal-header" style="padding: 9px 12px; flex-shrink: 0;">
+      <div class="modal-title-wrap" style="min-width: 0;">
+        <h2 style="color: var(--gold-lt); font-size: .96rem;">🏛️ Emeği Geçenler & Kulüp Künyesi</h2>
+        <span class="modal-sub">ERÜ Anadolu Tıp Tarihi Kulübü · Gürgen Ekibi</span>
       </div>
       <button class="modal-close" id="closeCreditsBtn" aria-label="Kapat">✕</button>
     </div>
-    <div class="modal-body" style="padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; max-height: 84vh; overflow-y: auto;">
+    <div class="modal-body" style="padding: 8px 12px; display: flex; flex-direction: column; gap: 7px; overflow-y: auto; overflow-x: hidden;">
       
-      <!-- Oyun Bittiğinde Görünen Tebrik/Bilgi Başlığı -->
-      <div id="creditsGameOverBanner" class="hidden" style="background: linear-gradient(135deg, #38190d, #1c0e07); border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px 14px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
-        <span style="font-size: .75rem; color: #ffd166; font-weight: 800; letter-spacing: .09em; display: block;">🏁 OYUN SONA ERDİ</span>
-        <div style="font-size: 1.02rem; color: #ffffff; font-weight: 900; margin-top: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
-          Emek ve Katkılarınız İçin Teşekkür Ederiz!
+      <!-- Oyun Bittiğinde En Üstte Çıkan Parlak Skor Kaydetme & Skor Tablosu Kutusu -->
+      <div id="creditsGameOverBanner" class="hidden nickname-form" style="text-align: center; padding: 8px 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
+          <span class="score-step-badge" style="margin-bottom: 0;">👇 SKORUNU BURADAN KAYDET! 👇</span>
+          <strong id="bannerScoreBadge" style="font-size: .78rem; color: var(--gold-lt);">SEVİYE 01</strong>
         </div>
-        <div style="font-size: .78rem; color: #e6d8c5; margin-top: 3px; font-weight: 600;">
-          Anadolu Tıp Tarihi Kulübü & Gürgen Ekibi Künyesi
+        <div class="nickname-input-group" style="margin-top: 4px;">
+          <input type="text" id="bannerPlayerNickname" maxlength="24" placeholder="Adını buraya yaz..." />
+          <button type="button" id="bannerSaveScoreBtn" class="save-score-btn">🏆 SKORU KAYDET</button>
         </div>
+        <span id="bannerSaveStatusMsg" class="save-status-msg"></span>
+        <button type="button" id="bannerOpenScoresBtn" class="leaderboard-link-btn" style="width: 100%; margin-top: 3px; padding: 7px 8px; border-radius: 7px; border: 1px solid var(--gold); background: #22150c; color: var(--gold-lt); font-size: .73rem; font-weight: 800; cursor: pointer;">
+          📊 Canlı Skor Tablosunu & Sıralamayı Gör →
+        </button>
       </div>
 
       <!-- Sinematik Film Sonu Kayan Jenerik -->
       <div class="cinema-credits-wrapper">
         <div class="cinema-credits-container" id="cinemaCreditsContainer">
-          <div class="cinema-credits-crawl">
-            <div style="font-size: .95rem; font-weight: 900; color: #ffd166; margin-bottom: 4px; letter-spacing: .08em; text-shadow: 0 0 12px rgba(255, 209, 102, 0.6);">✦ ✦ ✦ BEY HEKİM KAZANI ✦ ✦ ✦</div>
-            <div style="font-size: 1.08rem; font-weight: 900; color: #ffffff; line-height: 1.4; padding: 0 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.95);">ANADOLU TIP TARİHİ KULÜBÜNÜN GÜRGEN EKİBİ TARAFINDAN HAZIRLANMIŞTIR</div>
-            <div style="font-size: .84rem; color: #e6d7c3; margin-top: 6px; margin-bottom: 18px; font-weight: 600; text-shadow: 0 1px 4px #000;">Erciyes Üniversitesi Tıp Fakültesi · Kadim Tıp Mirası</div>
+          <div class="cinema-credits-crawl" style="padding: 16px 12px 200px 12px;">
+            <div style="font-size: .84rem; font-weight: 900; color: #ffd166; margin-bottom: 4px; letter-spacing: .05em;">✦ ✦ ✦ BEY HEKİM KAZANI ✦ ✦ ✦</div>
+            <div style="font-size: .90rem; font-weight: 900; color: #ffffff; line-height: 1.35;">ANADOLU TIP TARİHİ KULÜBÜNÜN GÜRGEN EKİBİ TARAFINDAN HAZIRLANMIŞTIR</div>
+            <div style="font-size: .74rem; color: #e6d7c3; margin-top: 4px; margin-bottom: 10px; font-weight: 600;">Erciyes Üniversitesi Tıp Fakültesi · Kadim Tıp Mirası</div>
             <div class="cinema-divider"></div>
 
             <span class="cinema-badge">💻 PROJEDE EMEĞİ GEÇENLER</span>
@@ -1482,77 +1818,166 @@
             <div class="cinema-divider"></div>
 
             <span class="cinema-badge">📢 BÜYÜK ÇAĞRI</span>
-            <div style="font-size: 1.18rem; font-weight: 900; color: #ffe082; margin: 14px 0 6px 0; text-shadow: 0 0 14px rgba(255, 224, 130, 0.65);">« Kulübümüze Üye Olmayı UNUTMAYIN! »</div>
-            <div style="font-size: .88rem; color: #ffffff; font-weight: 800; margin-bottom: 8px; background: rgba(212, 168, 72, 0.28); border: 1px solid rgba(255, 209, 102, 0.55); border-radius: 6px; padding: 5px 12px; display: inline-block;">kulup.erciyes.edu.tr/uyelik/uyeol</div>
-            <div style="font-size: 1.02rem; font-weight: 900; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.95);">— ANADOLU TIP TARİHİ KULÜBÜ · GÜRGEN EKİBİ —</div>
-            <div style="font-size: .84rem; color: #e6d7c3; margin-top: 6px; font-weight: 600;">KAYSERİ · 2026</div>
+            <div style="font-size: .98rem; font-weight: 900; color: #ffe082; margin: 10px 0 4px 0;">« Kulübümüze Üye Olmayı UNUTMAYIN! »</div>
+            <div style="font-size: .78rem; color: #ffffff; font-weight: 800; margin-bottom: 6px; background: rgba(212, 168, 72, 0.28); border: 1px solid rgba(255, 209, 102, 0.55); border-radius: 6px; padding: 4px 8px; display: inline-block; word-break: break-all;">kulup.erciyes.edu.tr/uyelik/uyeol</div>
+            <div style="font-size: .86rem; font-weight: 900; color: #ffffff;">— ANADOLU TIP TARİHİ KULÜBÜ · GÜRGEN EKİBİ —</div>
+            <div style="font-size: .74rem; color: #e6d7c3; margin-top: 4px; font-weight: 600;">KAYSERİ · 2026</div>
           </div>
         </div>
       </div>
+
       <!-- Akış Kontrol Çubuğu -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: -4px; padding: 0 4px;">
-        <span style="font-size: .68rem; color: var(--muted);">👆 Parmağınızla serbestçe kaydırabilirsiniz</span>
-        <div style="display: flex; gap: 6px;">
-          <button type="button" id="creditsPauseBtn" style="background: #25160d; border: 1px solid var(--border); color: var(--gold-lt); font-size: .72rem; padding: 4px 9px; border-radius: 6px; cursor: pointer;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 2px; gap: 4px;">
+        <span style="font-size: .63rem; color: var(--muted);">👆 Parmağınızla kaydırabilirsiniz</span>
+        <div style="display: flex; gap: 5px; flex-shrink: 0;">
+          <button type="button" id="creditsPauseBtn" style="background: #25160d; border: 1px solid var(--border); color: var(--gold-lt); font-size: .66rem; padding: 3px 7px; border-radius: 6px; cursor: pointer;">
             ⏸ Duraklat
           </button>
-          <button type="button" id="creditsRewindBtn" style="background: #25160d; border: 1px solid var(--border); color: var(--gold-lt); font-size: .72rem; padding: 4px 9px; border-radius: 6px; cursor: pointer;">
+          <button type="button" id="creditsRewindBtn" style="background: #25160d; border: 1px solid var(--border); color: var(--gold-lt); font-size: .66rem; padding: 3px 7px; border-radius: 6px; cursor: pointer;">
             ⏮ Başa Sar
           </button>
         </div>
       </div>
 
-      <!-- ERÜ Topluluk Kayıt Butonu -->
-      <div style="background: linear-gradient(135deg, #2b1a0e, #180f08); border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px; text-align: center;">
-        <span style="font-size: .72rem; color: var(--gold); font-weight: 700; letter-spacing: .08em; display: block; margin-bottom: 4px;">ERCİYES ÜNİVERSİTESİ ÖĞRENCİ KULÜBÜ</span>
-        <div style="font-size: 1.02rem; font-weight: 800; color: #fff; margin-bottom: 8px;">KULÜBÜMÜZE ÜYE OLMAYI UNUTMAYIN!</div>
-        <a href="https://kulup.erciyes.edu.tr/uyelik/uyeol" target="_blank" class="leaderboard-link-btn" style="display: block; text-decoration: none; padding: 11px; background: var(--gold); color: #110d0b; font-weight: 800; font-size: .88rem; border-radius: 6px; box-shadow: 0 3px 12px rgba(212, 168, 72, 0.4);">
-          🏛️ KULÜBE HEMEN ÜYE OL
-        </a>
-        <span style="font-size: .66rem; color: var(--muted); display: block; margin-top: 4px;">kulup.erciyes.edu.tr/uyelik/uyeol</span>
-      </div>
-
-      <!-- Tabîb Ekmeleddin PDF İndir & Biyografi -->
-      <div style="background: #1c130b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
-        <h3 style="color: var(--gold-lt); font-size: .85rem; margin-bottom: 6px;">📜 Tabîb Ekmeleddin (Bey Hekim) Kimdir?</h3>
-        <p style="font-size: .75rem; color: var(--ink); line-height: 1.4; margin-bottom: 10px;">
-          13. Yüzyıl Selçuklu Saray Başhekimi ve Hz. Mevlânâ'nın özel tabibi olan Tabîb Ekmeleddin'in tıp mirasını anlatan altın tezhip çerçeveli resmi PDF'i indirin.
+      <!-- Tabîb Ekmeleddin PDF & Biyografi Kartı -->
+      <div style="background: #1c130b; border: 1px solid var(--gold); border-radius: 10px; padding: 8px 10px; text-align: center;">
+        <h3 style="color: var(--gold-lt); font-size: .78rem; margin-bottom: 3px;">📜 Tabîb Ekmeleddin (Bey Hekim) Kimdir?</h3>
+        <p style="font-size: .68rem; color: var(--ink); line-height: 1.25; margin-bottom: 6px;">
+          13. Yüzyıl Selçuklu Saray Başhekimi Tabîb Ekmeleddin'in tezhipli monografisini okuyun veya PDF olarak açın.
         </p>
-        <div style="display: flex; gap: 8px;">
-          <a href="/download/tabib_ekmeleddin_kimdir.pdf" download class="leaderboard-link-btn" style="flex: 1; text-decoration: none; padding: 9px; font-size: .78rem; background: #2a1b10; border: 1px solid var(--gold); color: var(--gold-lt);">
-            📥 Tezhipli PDF İndir
-          </a>
-          <button type="button" id="openBioModalFromCreditsBtn" class="leaderboard-link-btn" style="flex: 1; padding: 9px; font-size: .78rem; background: #2a1b10; border: 1px solid var(--border); color: var(--ink);">
-            📖 Biyografiyi Oku
+        <div style="display: flex; gap: 5px; width: 100%;">
+          <button type="button" id="openBioModalFromCreditsBtn" class="leaderboard-link-btn" style="flex: 1.1; padding: 7px 5px; font-size: .71rem; background: #2a1b10; border: 1px solid var(--gold); color: var(--gold-lt); font-weight: 700; cursor: pointer;">
+            📖 Oku
           </button>
+          <a href="/download/tabib_ekmeleddin_kimdir.pdf" target="_blank" rel="noopener" class="leaderboard-link-btn" style="flex: 1.1; text-decoration: none; padding: 7px 5px; font-size: .71rem; background: #2a1b10; border: 1px solid var(--gold); color: var(--gold-lt); font-weight: 700;">
+            📄 PDF Aç
+          </a>
+          <a href="/download/tabib_ekmeleddin_kimdir.pdf?download=1" class="leaderboard-link-btn" style="flex: 0.85; text-decoration: none; padding: 7px 4px; font-size: .70rem; background: #18100a; border: 1px solid var(--border); color: var(--ink);">
+            📥 İndir
+          </a>
         </div>
       </div>
 
-      <!-- Oyun Sonu / Skor & Hızlı Başlatma Butonları -->
-      <div style="display: flex; gap: 8px; margin-top: 4px;">
-        <button type="button" id="creditsCloseToScoreBtn" class="leaderboard-link-btn" style="flex: 1; padding: 10px; font-size: .80rem; background: #25160d; border: 1px solid var(--gold); color: var(--gold-lt); text-align: center; cursor: pointer;">
-          📊 Skoru Gör & Kaydet
-        </button>
-        <button type="button" id="creditsResetBtn" class="modal-reset-btn" style="flex: 1; padding: 10px; font-size: .80rem; background: linear-gradient(135deg, #2b7a4b, #194d2e); color: #fff; font-weight: 700; border: none; border-radius: 6px; cursor: pointer;">
-          ↻ Yeni Oyun
-        </button>
+      <!-- ERÜ Topluluk Kayıt Butonu -->
+      <div style="background: linear-gradient(135deg, #2b1a0e, #180f08); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+        <div style="text-align: left; min-width: 0;">
+          <span style="font-size: .58rem; color: var(--gold); font-weight: 700; display: block;">ERÜ ANADOLU TIP TARİHİ KULÜBÜ</span>
+          <strong style="font-size: .76rem; color: #fff;">Kulübümüze Üye Olun!</strong>
+        </div>
+        <a href="https://kulup.erciyes.edu.tr/uyelik/uyeol" target="_blank" rel="noopener" class="leaderboard-link-btn" style="text-decoration: none; padding: 7px 10px; background: var(--gold); color: #110d0b; font-weight: 800; font-size: .74rem; border-radius: 7px; flex-shrink: 0;">
+          🏛️ Üye Ol →
+        </a>
       </div>
 
+    </div>
+    <!-- Sabit Alt Aksiyon Butonları (Ekrandan Taşmaz) -->
+    <div style="display: flex; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--border); background: #18100a; flex-shrink: 0;">
+      <button type="button" id="creditsCloseToScoreBtn" class="leaderboard-link-btn" style="flex: 1.25; padding: 9px 8px; font-size: .76rem; background: linear-gradient(135deg, #d4a848, #9c6e1e); border: none; color: #110d0b; font-weight: 900; cursor: pointer;">
+        📊 Skoru Kaydet & Skorlar
+      </button>
+      <button type="button" id="creditsResetBtn" class="modal-reset-btn" style="flex: 1; padding: 9px 8px; font-size: .76rem; background: linear-gradient(135deg, #2b7a4b, #194d2e); color: #fff; font-weight: 800; border: none; border-radius: 8px; cursor: pointer;">
+        ↻ Yeni Oyun
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tek Kişilik Oyuncu Skorları Dashboard Modalı ── -->
+<div class="modal-backdrop hidden" id="leaderboardModal" style="z-index: 1720;">
+  <div class="modal-card" style="max-width: 480px; max-height: 90dvh;">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <h2 style="color: var(--gold-lt); font-size: 1.1rem;">🏆 Tek Kişilik Oyuncu Skorları Dashboard</h2>
+        <span class="modal-sub">Konya Dârüşşifası En Yüksek Dereceler & Canlı Sıralama</span>
+      </div>
+      <button class="modal-close" id="closeLeaderboardModalBtn" aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;">
+      <div class="dash-stats-grid">
+        <div class="dash-stat-box">
+          <span class="lbl">🏆 REKOR SEVİYE</span>
+          <span class="val" id="dashModalMaxLevel">--</span>
+        </div>
+        <div class="dash-stat-box">
+          <span class="lbl">🔥 REKOR KOMBO</span>
+          <span class="val" id="dashModalMaxCombo">--</span>
+        </div>
+        <div class="dash-stat-box">
+          <span class="lbl">📜 TOPLAM KAYIT</span>
+          <span class="val" id="dashModalTotal">--</span>
+        </div>
+      </div>
+
+      <div id="dashModalChampionBanner" style="background: linear-gradient(135deg, #2b1c10, #170f09); border: 1px solid var(--gold); border-radius: 8px; padding: 7px 10px; font-size: .76rem; color: var(--gold-lt); text-align: center; font-weight: 700;">
+        👑 Başhekim Şampiyonu yükleniyor...
+      </div>
+
+      <div class="dash-scores-list" id="dashModalScoresList" style="max-height: 46dvh;">
+        <div style="font-size: .78rem; color: var(--muted); text-align: center; padding: 18px;">Oyuncu skorları yükleniyor...</div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 2px;">
+        <button type="button" id="refreshLeaderboardModalBtn" class="leaderboard-link-btn" style="flex: 1; cursor: pointer; font-size: .76rem; text-align: center;">
+          🔄 Skorları Yenile
+        </button>
+        <a href="/stand" target="_blank" rel="noopener" class="leaderboard-link-btn" style="flex: 1.2; text-align: center; font-size: .76rem; border-color: var(--gold); color: var(--gold-lt);">
+          🖥️ Stand & Tablet Ekranı
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stand & Web QR Kodu Modalı (Tablet / Telefon Sergi İçin) ── -->
+<div class="modal-backdrop hidden" id="qrStandModal" style="z-index: 1740;">
+  <div class="modal-card" style="max-width: 420px; text-align: center;">
+    <div class="modal-header" style="padding: 9px 12px; flex-shrink: 0;">
+      <div class="modal-title-wrap" style="width: 100%; min-width: 0;">
+        <h2 style="color: var(--gold-lt); font-size: 1.02rem;">📱 Oyun & Stand QR Kodu</h2>
+        <span class="modal-sub">Kameranla Okut, Telefonunda Hemen Oyna!</span>
+      </div>
+      <button class="modal-close" id="closeQrStandModalBtn" aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; overflow-y: auto;">
+      <div style="background: #fff; padding: 10px; border-radius: 14px; border: 3px solid var(--gold-lt); box-shadow: 0 0 20px rgba(212, 168, 72, 0.35);">
+        <img src="/api/qr" alt="Oyun QR Kodu" style="width: min(190px, 52vw); height: min(190px, 52vw); display: block;" />
+      </div>
+      <div style="font-size: .82rem; color: var(--gold-lt); font-weight: 800;">
+        Tek Kişilik Macera veya 2 Telefonla 1v1 Düello!
+      </div>
+      <div id="qrStandUrlText" style="width: 100%; padding: 6px 8px; background: #120b07; border: 1px solid var(--border); border-radius: 8px; font-size: .68rem; color: var(--muted); word-break: break-all; font-family: monospace;">
+        Yükleniyor...
+      </div>
+      <div style="display: flex; gap: 6px; width: 100%;">
+        <a href="/stand" class="leaderboard-link-btn" style="flex: 1.3; background: linear-gradient(135deg, var(--gold), #9c6e1e); color: #110d0b; font-weight: 900; font-size: .75rem; padding: 9px 8px; border: none;">
+          🖥️ Stand & Skor Dashboard
+        </a>
+        <button type="button" id="closeQrStandModalBtn2" class="modal-reset-btn" style="flex: 0.7; font-size: .76rem; padding: 9px 8px;">Kapat</button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- ── Tabîb Ekmeleddin (Bey Hekim) Kimdir? Modalı ── -->
-<div class="modal-backdrop hidden" id="ekmeleddinBioModal" style="z-index: 1300;">
-  <div class="modal-card" style="max-width: 520px;">
+<div class="modal-backdrop hidden" id="ekmeleddinBioModal" style="z-index: 1750;">
+  <div class="modal-card" style="max-width: 520px; max-height: 92dvh;">
     <div class="modal-header">
       <div class="modal-title-wrap">
-        <h2 style="color: var(--gold-lt); font-size: 1.15rem;">🩺 Tabîb Ekmeleddin (Bey Hekim) Kimdir?</h2>
+        <h2 style="color: var(--gold-lt); font-size: 1.05rem;">🩺 Tabîb Ekmeleddin (Bey Hekim) Kimdir?</h2>
         <span class="modal-sub">13. Yüzyıl Selçuklu Saray Başhekimi · Klinik Tıp & Semiyoloji Monografisi</span>
       </div>
       <button class="modal-close" id="closeEkmeleddinBioBtn" aria-label="Kapat">✕</button>
     </div>
-    <div class="modal-body" style="padding: 14px 18px; font-size: .80rem; line-height: 1.55; color: var(--ink); max-height: 72vh; overflow-y: auto; display: flex; flex-direction: column; gap: 11px;">
+    <div class="modal-body" style="padding: 12px 15px; font-size: .79rem; line-height: 1.5; color: var(--ink); overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; gap: 6px;">
+        <a href="/download/tabib_ekmeleddin_kimdir.pdf" target="_blank" rel="noopener" class="leaderboard-link-btn" style="flex: 1.2; text-align: center; text-decoration: none; padding: 9px; background: linear-gradient(135deg, var(--gold), #996d1c); color: #110d0b; font-weight: 800; font-size: .78rem; border-radius: 6px;">
+          📄 Orijinal Tezhipli PDF'i Aç (2 Sayfa)
+        </a>
+        <a href="/download/tabib_ekmeleddin_kimdir.pdf?download=1" class="leaderboard-link-btn" style="flex: 0.8; text-align: center; text-decoration: none; padding: 9px; background: #26180e; border: 1px solid var(--gold); color: var(--gold-lt); font-weight: 700; font-size: .76rem; border-radius: 6px;">
+          📥 PDF İndir
+        </a>
+      </div>
+
       <p><strong style="color: var(--gold);">Ekmeleddîn Tabîb el-Nahcivânî</strong> (halk ve tıp çevrelerindeki unvanıyla <strong>Bey Hekim</strong> / <em>Melikü'l-Hükemâ</em>), 13. yüzyılda Anadolu Selçuklu Devleti'nin başkenti Konya'da yaşamış; İbn Sînâ ve Râzî ekollerini Selçuklu klinik pratiğinde sentezlemiş en büyük tabiptir.</p>
       
       <!-- Klinik Semiyoloji & Sfigmoloji -->
@@ -1595,9 +2020,14 @@
         • Cerrahi müdahalelerde koterizasyon, flebotomi ve antiseptik olarak gümüş suyu ve şap solüsyonları kullanılmıştır.
       </div>
       
-      <a href="/download/tabib_ekmeleddin_kimdir.pdf" download class="leaderboard-link-btn" style="text-align: center; text-decoration: none; padding: 12px; background: linear-gradient(135deg, var(--gold), #996d1c); color: #110d0b; font-weight: 800; font-size: .85rem; margin-top: 4px; border-radius: 6px;">
-        📥 Tezhipli Klinik Tıp Monografisi PDF'ini İndir (2 Sayfa)
-      </a>
+      <div style="display: flex; gap: 8px; margin-top: 2px;">
+        <a href="/download/tabib_ekmeleddin_kimdir.pdf" target="_blank" rel="noopener" class="leaderboard-link-btn" style="flex: 1.2; text-align: center; text-decoration: none; padding: 11px; background: linear-gradient(135deg, var(--gold), #996d1c); color: #110d0b; font-weight: 800; font-size: .82rem; border-radius: 6px;">
+          📄 Tezhipli PDF'i Tarayıcıda Aç
+        </a>
+        <a href="/download/tabib_ekmeleddin_kimdir.pdf?download=1" class="leaderboard-link-btn" style="flex: 0.8; text-align: center; text-decoration: none; padding: 11px; background: #26180e; border: 1px solid var(--gold); color: var(--gold-lt); font-weight: 700; font-size: .80rem; border-radius: 6px;">
+          📥 Cihaza İndir
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -1621,7 +2051,18 @@
         <span class="modal-sub">Tabîb Ekmeleddin'in (Bey Hekim) huzurunda yarış</span>
       </div>
     </div>
-    <div class="modal-body" style="padding: 16px 18px; display: flex; flex-direction: column; gap: 14px;">
+    <div class="modal-body" style="padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="background: #140d09; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <div style="text-align: left;">
+          <span style="font-size: .62rem; color: var(--muted); display: block;">DÜELLO ODA KODU</span>
+          <strong id="duelLobbyRoomCode" style="font-size: 1.0rem; color: var(--gold-lt); letter-spacing: .1em;">{{ room_id }}</strong>
+        </div>
+        <div style="display: flex; gap: 5px; align-items: center;">
+          <input type="text" id="joinFriendRoomInput" maxlength="12" placeholder="Oda Kodu" style="width: 92px; background: #0e0906; border: 1px solid var(--border); border-radius: 6px; padding: 5px 7px; color: #fff; font-size: .75rem; text-transform: uppercase; text-align: center;" />
+          <button type="button" id="joinFriendRoomBtn" style="background: var(--gold); color: #110d0b; border: none; border-radius: 6px; padding: 5px 9px; font-size: .72rem; font-weight: 800; cursor: pointer;">Katıl</button>
+        </div>
+      </div>
+
       <div class="lobby-section">
         <label for="duelNickname" class="lobby-label">Çırak Adın:</label>
         <input type="text" id="duelNickname" maxlength="16" placeholder="İsmini gir..." class="lobby-input">
@@ -1651,8 +2092,11 @@
         ⚔️ DÜELLOYA HAZIRIM!
       </button>
       <div class="duel-tip">
-        🎯 İlk 3 raundu kazanan çırak Kitâbü'l-Esrâr'ın şampiyonu olur!
+        🎯 2. oyuncu da QR okutup "1v1 Çırak Düellosu" seçtiğinde otomatik olarak bu odaya bağlanır!
       </div>
+      <button type="button" id="duelBackToModeBtn" class="leaderboard-link-btn" style="background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: .75rem; padding: 7px; cursor: pointer;">
+        ← Oyun Modunu Değiştir (Tek Kişilik / 1v1)
+      </button>
     </div>
   </div>
 </div>
@@ -1684,7 +2128,11 @@
 </div>
 
 <script>
-  const roomId            = {{ room_id|tojson }};
+  let roomId              = {{ room_id|tojson }};
+  let socket              = null;
+  const roomCodeEl        = document.getElementById('roomCode');
+  const stageWrap         = document.getElementById('stageWrap');
+  const stageCanvas       = document.getElementById('stageCanvas');
   const statusEl          = document.getElementById('status');
   const gridEl            = document.getElementById('buttonsGrid');
   const timerWrap         = document.getElementById('timerWrap');
@@ -1714,6 +2162,20 @@
   const toastTitle        = document.getElementById('toastTitle');
   const toastDesc         = document.getElementById('toastDesc');
   const soundBtn          = document.getElementById('soundBtn');
+
+  // Mod Seçimi Elemanları
+  const modeSelectModal       = document.getElementById('modeSelectModal');
+  const openModeSelectBtn     = document.getElementById('openModeSelectBtn');
+  const closeModeSelectBtn    = document.getElementById('closeModeSelectBtn');
+  const selectSingleModeBtn   = document.getElementById('selectSingleModeBtn');
+  const selectDuelModeBtn     = document.getElementById('selectDuelModeBtn');
+  const openCreditsFromModeBtn= document.getElementById('openCreditsFromModeBtn');
+  const openBioFromModeBtn    = document.getElementById('openBioFromModeBtn');
+  const prologueBackToModeBtn = document.getElementById('prologueBackToModeBtn');
+  const duelBackToModeBtn     = document.getElementById('duelBackToModeBtn');
+  const duelLobbyRoomCode     = document.getElementById('duelLobbyRoomCode');
+  const joinFriendRoomInput   = document.getElementById('joinFriendRoomInput');
+  const joinFriendRoomBtn     = document.getElementById('joinFriendRoomBtn');
 
   // Oyun sonu modal elemanları
   const gameOverModal     = document.getElementById('gameOverModal');
@@ -2089,19 +2551,17 @@
 
   function renderButtons() {
     gridEl.innerHTML = '';
-    let activeIds = unlockedList.length > 0 ? unlockedList : Object.keys(elementsMap).slice(0, 8);
+    let activeIds = unlockedList.length > 0 ? unlockedList : Object.keys(elementsMap).slice(0, 4);
 
-    if (activeCategory !== 'all') {
-      activeIds = activeIds.filter(id => {
-        const el = elementsMap[id];
-        return el && el.category === activeCategory;
-      });
-    }
-
-    if (activeIds.length > 8) {
-      gridEl.classList.add('many-cols');
+    gridEl.classList.remove('cols-2', 'cols-3', 'cols-4', 'cols-5', 'many-cols');
+    if (activeIds.length <= 4) {
+      gridEl.classList.add('cols-2');
+    } else if (activeIds.length <= 9) {
+      gridEl.classList.add('cols-3');
+    } else if (activeIds.length <= 16) {
+      gridEl.classList.add('cols-4');
     } else {
-      gridEl.classList.remove('many-cols');
+      gridEl.classList.add('cols-5');
     }
 
     activeIds.forEach(id => {
@@ -2112,10 +2572,9 @@
       btn.dataset.id = el.id;
 
       const r = el.color[0], g = el.color[1], b = el.color[2];
-      const r2 = Math.floor(r * 0.6), g2 = Math.floor(g * 0.6), b2 = Math.floor(b * 0.6);
-      btn.style.background = `linear-gradient(140deg, rgb(${r},${g},${b}), rgb(${r2},${g2},${b2}))`;
+      const r2 = Math.floor(r * 0.58), g2 = Math.floor(g * 0.58), b2 = Math.floor(b * 0.58);
+      btn.style.background = `linear-gradient(145deg, rgb(${r},${g},${b}), rgb(${r2},${g2},${b2}))`;
 
-      // XSS koruması: textContent ile güvenli DOM oluştur
       const symbolSpan = document.createElement('span');
       symbolSpan.className = 'symbol';
       symbolSpan.textContent = el.symbol;
@@ -2130,9 +2589,6 @@
       btn.addEventListener('click', () => sendButton(el.id, btn, el.category));
       gridEl.appendChild(btn);
     });
-
-    const totalActive = unlockedList.length > 0 ? unlockedList.length : 8;
-    unlockedNote.textContent = `${totalActive} / 30 element açık` + (activeCategory !== 'all' ? ` (${activeIds.length} gösteriliyor)` : '');
   }
 
   function sendButton(matId, btn, cat) {
@@ -2143,6 +2599,9 @@
     btn.classList.add('pressed');
     playElementSound(cat || 'mineral');
     if (navigator.vibrate) navigator.vibrate(22);
+    if (typeof triggerPlayerBottleThrow === 'function') {
+      triggerPlayerBottleThrow(matId);
+    }
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ button: matId, player_id: myPlayerId }));
     }
@@ -2300,23 +2759,148 @@
 
   }
 
+  // ── Tek Kişilik Oyuncu Skorları Dashboard & Stand QR Modal Yönetimi ──
+  const leaderboardModal          = document.getElementById('leaderboardModal');
+  const openLeaderboardModalBtn   = document.getElementById('openLeaderboardModalBtn');
+  const openLeaderboardFromModeBtn= document.getElementById('openLeaderboardFromModeBtn');
+  const openLeaderboardFromGameOverBtn = document.getElementById('openLeaderboardFromGameOverBtn');
+  const closeLeaderboardModalBtn  = document.getElementById('closeLeaderboardModalBtn');
+  const refreshLeaderboardModalBtn= document.getElementById('refreshLeaderboardModalBtn');
+  const gameOverScoresList        = document.getElementById('gameOverScoresList');
+  const dashModalScoresList       = document.getElementById('dashModalScoresList');
+  const dashModalMaxLevel         = document.getElementById('dashModalMaxLevel');
+  const dashModalMaxCombo         = document.getElementById('dashModalMaxCombo');
+  const dashModalTotal            = document.getElementById('dashModalTotal');
+  const dashModalChampionBanner   = document.getElementById('dashModalChampionBanner');
+
+  const qrStandModal              = document.getElementById('qrStandModal');
+  const openQrStandModalBtn       = document.getElementById('openQrStandModalBtn');
+  const openQrStandFromModeBtn    = document.getElementById('openQrStandFromModeBtn');
+  const openQrFromGameOverBtn     = document.getElementById('openQrFromGameOverBtn');
+  const closeQrStandModalBtn      = document.getElementById('closeQrStandModalBtn');
+  const closeQrStandModalBtn2     = document.getElementById('closeQrStandModalBtn2');
+  const qrStandUrlText            = document.getElementById('qrStandUrlText');
+
+  function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function renderScoresRowsHtml(scores, maxRows = 25) {
+    if (!scores || scores.length === 0) {
+      return '<div style="font-size: .74rem; color: var(--muted); text-align: center; padding: 12px;">Henüz skor kaydedilmedi. İlk rekoru sen kır!</div>';
+    }
+    const medals = ['🥇', '🥈', '🥉'];
+    return scores.slice(0, maxRows).map((s, idx) => `
+      <div class="dash-score-row ${idx < 3 ? 'top-rank' : ''}">
+        <span class="dash-rank">${idx < 3 ? medals[idx] : (s.rank + '.')}</span>
+        <div class="dash-player">
+          <strong>${escHtml(s.player_name)}</strong>
+          <small>${escHtml(s.title)} · ${escHtml(s.time_str || '')}</small>
+        </div>
+        <div class="dash-meta">
+          ${s.max_combo >= 2 ? `<span style="font-size:.68rem; color:#fbbf24;">🔥x${s.max_combo}</span>` : ''}
+          <span class="dash-lvl-pill">Sv.${String(s.level).padStart(2, '0')}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function loadScoreDashboardData() {
+    try {
+      const res = await fetch('/api/dashboard');
+      const data = await res.json();
+      if (!data || !data.ok) return;
+
+      if (qrStandUrlText && data.play_url) {
+        qrStandUrlText.textContent = data.play_url;
+      }
+      if (dashModalMaxLevel) dashModalMaxLevel.textContent = data.max_level ? String(data.max_level).padStart(2, '0') : '00';
+      if (dashModalMaxCombo) dashModalMaxCombo.textContent = data.max_combo >= 2 ? ('🔥 x' + data.max_combo) : '—';
+      if (dashModalTotal) dashModalTotal.textContent = data.total_scores || 0;
+      if (dashModalChampionBanner) {
+        dashModalChampionBanner.textContent = data.max_level
+          ? `👑 Dârüşşifa Rekoru: ${data.champion_name} (Seviye ${String(data.max_level).padStart(2, '0')})`
+          : '👑 Henüz şampiyon kaydedilmedi — ilk rekoru sen kır!';
+      }
+
+      if (gameOverScoresList) {
+        gameOverScoresList.innerHTML = renderScoresRowsHtml(data.scores || [], 10);
+      }
+      if (dashModalScoresList) {
+        dashModalScoresList.innerHTML = renderScoresRowsHtml(data.scores || [], 30);
+      }
+    } catch (e) {}
+  }
+
+  function openLeaderboardDashboard() {
+    if (!leaderboardModal) return;
+    leaderboardModal.classList.remove('hidden');
+    playTone(580, 'sine', 0.08, 0.08);
+    loadScoreDashboardData();
+  }
+
+  function openQrStandModal() {
+    if (!qrStandModal) return;
+    qrStandModal.classList.remove('hidden');
+    playTone(580, 'sine', 0.08, 0.08);
+    loadScoreDashboardData();
+  }
+
+  if (openLeaderboardModalBtn) openLeaderboardModalBtn.addEventListener('click', openLeaderboardDashboard);
+  if (openLeaderboardFromModeBtn) openLeaderboardFromModeBtn.addEventListener('click', openLeaderboardDashboard);
+  if (openLeaderboardFromGameOverBtn) openLeaderboardFromGameOverBtn.addEventListener('click', openLeaderboardDashboard);
+  if (refreshLeaderboardModalBtn) refreshLeaderboardModalBtn.addEventListener('click', loadScoreDashboardData);
+  if (closeLeaderboardModalBtn && leaderboardModal) {
+    closeLeaderboardModalBtn.addEventListener('click', () => leaderboardModal.classList.add('hidden'));
+    leaderboardModal.addEventListener('click', (e) => {
+      if (e.target === leaderboardModal) leaderboardModal.classList.add('hidden');
+    });
+  }
+
+  if (openQrStandModalBtn) openQrStandModalBtn.addEventListener('click', openQrStandModal);
+  if (openQrStandFromModeBtn) openQrStandFromModeBtn.addEventListener('click', openQrStandModal);
+  if (openQrFromGameOverBtn) openQrFromGameOverBtn.addEventListener('click', openQrStandModal);
+  if (closeQrStandModalBtn && qrStandModal) {
+    closeQrStandModalBtn.addEventListener('click', () => qrStandModal.classList.add('hidden'));
+  }
+  if (closeQrStandModalBtn2 && qrStandModal) {
+    closeQrStandModalBtn2.addEventListener('click', () => qrStandModal.classList.add('hidden'));
+  }
+  if (qrStandModal) {
+    qrStandModal.addEventListener('click', (e) => {
+      if (e.target === qrStandModal) qrStandModal.classList.add('hidden');
+    });
+  }
+
+  const bannerPlayerNickname = document.getElementById('bannerPlayerNickname');
+  const bannerSaveScoreBtn   = document.getElementById('bannerSaveScoreBtn');
+  const bannerSaveStatusMsg  = document.getElementById('bannerSaveStatusMsg');
+  const bannerScoreBadge     = document.getElementById('bannerScoreBadge');
+  const bannerOpenScoresBtn  = document.getElementById('bannerOpenScoresBtn');
+
   // ── Oyun Sonu Modal İşlemleri ──
   closeGameOverBtn.addEventListener('click', () => gameOverModal.classList.add('hidden'));
   gameOverModal.addEventListener('click', (e) => {
     if (e.target === gameOverModal) gameOverModal.classList.add('hidden');
   });
 
-  saveScoreBtn.addEventListener('click', async () => {
-    const rawName = (playerNickname.value || '').trim();
+  async function submitPlayerScore(inputEl, msgEl, btnEl, openSummaryAfter = false) {
+    const rawName = (inputEl && inputEl.value ? inputEl.value : '').trim();
     const name = rawName || 'Simyacı';
     localStorage.setItem('razi_nickname', name);
+    if (playerNickname) playerNickname.value = name;
+    if (bannerPlayerNickname) bannerPlayerNickname.value = name;
 
-    // İstemci tarafı doğrulama: seviye 1-100 arasında olmalı
     const safeLevel = Math.max(1, Math.min(100, parseInt(lastGameOverLvl, 10) || 1));
     const safeCombo = Math.max(0, Math.min(200, parseInt(lastGameOverCombo, 10) || 0));
 
-    saveStatusMsg.textContent = 'Kaydediliyor…';
-    saveScoreBtn.disabled = true;
+    if (msgEl) {
+      msgEl.textContent = 'Kaydediliyor…';
+      msgEl.style.color = 'var(--gold-lt)';
+    }
+    if (btnEl) btnEl.disabled = true;
 
     try {
       const res = await fetch('/api/scores', {
@@ -2331,27 +2915,67 @@
       });
       const data = await res.json();
       if (data.ok) {
-        saveStatusMsg.textContent = '✅ Başarıyla liderlik tablosuna yazıldı!';
-        saveStatusMsg.style.color = 'var(--green-lt)';
+        const okText = '✅ Skorun liderlik tablosuna kaydedildi!';
+        if (saveStatusMsg) {
+          saveStatusMsg.textContent = okText;
+          saveStatusMsg.style.color = 'var(--green-lt)';
+        }
+        if (bannerSaveStatusMsg) {
+          bannerSaveStatusMsg.textContent = okText;
+          bannerSaveStatusMsg.style.color = 'var(--green-lt)';
+        }
         playVictoryChime();
+        if (window.confetti) confetti({ particleCount: 55, spread: 70, origin: { y: 0.4 } });
+        await loadScoreDashboardData();
+        if (openSummaryAfter) {
+          setTimeout(() => {
+            stopCreditsScroll();
+            if (creditsModal) creditsModal.classList.add('hidden');
+            if (gameOverModal) gameOverModal.classList.remove('hidden');
+          }, 550);
+        }
       } else {
-        saveStatusMsg.textContent = 'Hata: ' + (data.error || 'Kaydedilemedi');
-        saveStatusMsg.style.color = 'var(--red-lt)';
+        const errText = 'Hata: ' + (data.error || 'Kaydedilemedi');
+        if (msgEl) {
+          msgEl.textContent = errText;
+          msgEl.style.color = 'var(--red-lt)';
+        }
       }
     } catch (e) {
-      saveStatusMsg.textContent = 'Bağlantı hatası oluştu.';
-      saveStatusMsg.style.color = 'var(--red-lt)';
+      if (msgEl) {
+        msgEl.textContent = 'Bağlantı hatası oluştu.';
+        msgEl.style.color = 'var(--red-lt)';
+      }
     } finally {
-      saveScoreBtn.disabled = false;
+      if (btnEl) btnEl.disabled = false;
     }
+  }
+
+  saveScoreBtn.addEventListener('click', () => {
+    submitPlayerScore(playerNickname, saveStatusMsg, saveScoreBtn, false);
   });
+
+  if (bannerSaveScoreBtn) {
+    bannerSaveScoreBtn.addEventListener('click', () => {
+      submitPlayerScore(bannerPlayerNickname, bannerSaveStatusMsg, bannerSaveScoreBtn, true);
+    });
+  }
+
+  if (bannerOpenScoresBtn) {
+    bannerOpenScoresBtn.addEventListener('click', () => {
+      stopCreditsScroll();
+      if (creditsModal) creditsModal.classList.add('hidden');
+      if (gameOverModal) gameOverModal.classList.remove('hidden');
+      openLeaderboardDashboard();
+    });
+  }
 
   modalResetBtn.addEventListener('click', () => {
     gameOverModal.classList.add('hidden');
     if (creditsModal) creditsModal.classList.add('hidden');
     stopCreditsScroll();
     if (navigator.vibrate) navigator.vibrate(22);
-    if (socket.readyState === WebSocket.OPEN) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ button: 'reset', player_id: myPlayerId }));
     }
   });
@@ -2688,32 +3312,839 @@
     }
   }
 
-  // ── WebSocket ──
-  const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  const socket   = new WebSocket(`${protocol}://${location.host}/ws/${roomId}`);
+  // ── Mobil Dârüşşifa Sahnesi (60 FPS HTML5 Canvas + GSAP Animasyon Motoru) ──
+  const FALLBACK_ELEMENTS = {
+    civa:     { id: 'civa',     name: 'Cıva',       symbol: '☿', color: [155, 195, 225], category: 'metal' },
+    kukurt:   { id: 'kukurt',   name: 'Kükürt',     symbol: '🜍', color: [230, 185, 45],  category: 'mineral' },
+    antimon:  { id: 'antimon',  name: 'Antimon',    symbol: '♁', color: [145, 120, 190], category: 'metal' },
+    tuz:      { id: 'tuz',      name: 'Tuz',        symbol: '🜔', color: [195, 210, 220], category: 'mineral' },
+    demir:    { id: 'demir',    name: 'Demir',      symbol: '♂', color: [185, 85, 60],   category: 'metal' },
+    bakir:    { id: 'bakir',    name: 'Bakır',      symbol: '♀', color: [65, 175, 130],  category: 'metal' },
+    kursun:   { id: 'kursun',   name: 'Kurşun',     symbol: '♄', color: [105, 115, 130], category: 'metal' },
+    kalay:    { id: 'kalay',    name: 'Kalay',      symbol: '♃', color: [140, 165, 190], category: 'metal' },
+    gumus:    { id: 'gumus',    name: 'Gümüş',      symbol: '☽', color: [190, 205, 225], category: 'metal' },
+    altin:    { id: 'altin',    name: 'Altın',      symbol: '☉', color: [240, 190, 40],  category: 'metal' },
+    nisadir:  { id: 'nisadir',  name: 'Nişadır',    symbol: '🜹', color: [160, 210, 235], category: 'mineral' },
+    sap:      { id: 'sap',      name: 'Şap',        symbol: '🜖', color: [185, 195, 215], category: 'mineral' },
+    sirke:    { id: 'sirke',    name: 'Sirke',      symbol: 'ab', color: [200, 145, 85],  category: 'liquid' },
+    safran:   { id: 'safran',   name: 'Safran',     symbol: '✿', color: [235, 125, 40],  category: 'organic' },
+    afyon:    { id: 'afyon',    name: 'Afyon',      symbol: '❀', color: [170, 85, 200],  category: 'organic' },
+    kafur:    { id: 'kafur',    name: 'Kâfur',      symbol: '✦', color: [180, 230, 225], category: 'organic' }
+  };
 
-  socket.addEventListener('open', () => {
-    statusEl.textContent = 'Tabîb Ekmeleddin bekleniyor…';
-    statusEl.className   = 'status';
-    sendLobbyUpdate();
-  });
+  const SABUNCUOGLU_QUOTES = [
+    "Amasya Dârüşşifası'ndan selam! Dikkatini topla çırak!",
+    "Cerrâhiyyetü'l-İlhâniyye'de yazdım: Ölçü şaşarsa şifa kaçar!",
+    "Tabîb Ekmeleddin'in elini iyi izle, her damla hikmettir!",
+    "Sabır ve dikkat, hekimin en keskin neşteridir!"
+  ];
 
-  socket.addEventListener('close', () => {
-    statusEl.textContent = 'Bağlantı kesildi — sayfayı yenileyin.';
-    statusEl.className   = 'status error';
-    gridEl.classList.add('disabled');
-    timerWrap.classList.remove('visible');
-  });
+  const IDLE_RAZ_LOOP = [0, 0, 1, 1, 2, 2, 1, 0, 3, 3, 4, 4, 3, 0];
 
-  socket.addEventListener('message', event => {
+  const stageAssets = {
+    bg: new Image(),
+    razi: new Image(),
+    cauldronNormal: new Image(),
+    cauldronSurge: new Image(),
+    sabuncuoglu: new Image()
+  };
+  stageAssets.bg.src = '/assets/arkaplan_yeni.jpg';
+  stageAssets.razi.src = '/assets/PNG/razi_anim/razi_spritesheet.png';
+  stageAssets.cauldronNormal.src = '/assets/PNG/cauldron_clean/cauldron_normal_spritesheet.png';
+  stageAssets.cauldronSurge.src = '/assets/PNG/cauldron_clean/cauldron_surge_spritesheet.png';
+  stageAssets.sabuncuoglu.src = '/assets/PNG/sabuncuoglu_spritesheet.png';
+
+  const stageState = {
+    level: 1,
+    phaseLabel: 'Dârüşşifa Hazır',
+    stepCurrent: 0,
+    stepTotal: 0,
+    lastRevealedStep: 0,
+    activeStepBanner: null, // { step, total, symbol, name, color, timer }
+    cauldronColor: [72, 215, 135],
+    targetCauldronColor: [72, 215, 135],
+    surgeTimer: 0,
+    raziThrowTimer: 0,
+    sabThrowTimer: 0,
+    shakeTimer: 0,
+    shakeIntensity: 0,
+    raziBubbleText: 'Hoş geldin çırak! İksir sırasını dikkatle takip et.',
+    raziBubbleTimer: 4.0,
+    bottles: [],
+    particles: [],
+    popups: [],
+    ambientBubbles: [],
+    fallbackStepTimers: [],
+    sabuncuoglu: {
+      state: 'HIDDEN', // HIDDEN, ENTERING, WAVING, TALKING, IDLE_REVERSE, LEAVING
+      x: 920,
+      targetX: 650,
+      timer: 0,
+      animTime: 0,
+      facingLeft: true,
+      quote: '',
+      nextVisitCooldown: 20
+    }
+  };
+
+  for (let i = 0; i < 18; i++) {
+    stageState.ambientBubbles.push({
+      x: 440 + (Math.random() - 0.5) * 86,
+      y: 205 - Math.random() * 80,
+      r: 2.2 + Math.random() * 4.5,
+      vy: 20 + Math.random() * 28,
+      wobble: Math.random() * Math.PI * 2
+    });
+  }
+
+  function clearFallbackStepTimers() {
+    while (stageState.fallbackStepTimers.length > 0) {
+      clearTimeout(stageState.fallbackStepTimers.pop());
+    }
+  }
+
+  function getElementMeta(matId) {
+    if (matId && elementsMap && elementsMap[matId]) {
+      return elementsMap[matId];
+    }
+    if (matId && FALLBACK_ELEMENTS[matId]) {
+      return FALLBACK_ELEMENTS[matId];
+    }
+    return {
+      id: matId || 'iksir',
+      name: (matId || 'İksir').toString().toUpperCase(),
+      symbol: '⚗️',
+      color: [90, 215, 145],
+      category: 'mineral'
+    };
+  }
+
+  function flashButtonCard(matId) {
+    if (!matId) return;
+    const btn = document.querySelector(`[data-id="${matId}"]`);
+    if (!btn) return;
+    btn.classList.add('flash');
+    if (window.gsap) {
+      gsap.fromTo(btn, { scale: 1.12 }, { scale: 1.0, duration: 0.42, ease: 'back.out(2)' });
+    }
+    setTimeout(() => btn.classList.remove('flash'), 520);
+  }
+
+  function spawnCauldronSplash(colorRGB, count = 28) {
+    const cx = 440, cy = 188;
+    for (let i = 0; i < count; i++) {
+      const angle = -Math.PI * 0.12 - Math.random() * Math.PI * 0.76;
+      const speed = 65 + Math.random() * 155;
+      stageState.particles.push({
+        x: cx + (Math.random() - 0.5) * 48,
+        y: cy + (Math.random() - 0.5) * 10,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 40,
+        r: 2.8 + Math.random() * 4.8,
+        color: colorRGB || [90, 220, 145],
+        alpha: 1,
+        life: 0.48 + Math.random() * 0.45
+      });
+    }
+  }
+
+  function spawnBottleThrow(fromX, fromY, matId, whoLabel, targetXOverride) {
+    const meta = getElementMeta(matId);
+    const col = Array.isArray(meta.color) ? meta.color : [90, 220, 145];
+    const tx = targetXOverride || (440 + (Math.random() - 0.5) * 24);
+    const ty = 188;
+    stageState.bottles.push({
+      startX: fromX,
+      startY: fromY,
+      endX: tx,
+      endY: ty,
+      peakY: Math.min(fromY, ty) - (88 + Math.random() * 22),
+      t: 0,
+      duration: 0.52,
+      symbol: meta.symbol || '⚗️',
+      name: meta.name || matId,
+      color: col,
+      who: whoLabel || ''
+    });
+  }
+
+  function triggerRaziBottleThrow(matId, step, total, p1Mat, p2Mat) {
+    const meta = getElementMeta(matId);
+    const col = Array.isArray(meta.color) ? meta.color : [212, 168, 72];
+    stageState.raziThrowTimer = 0.52;
+    stageState.stepCurrent = step || 1;
+    stageState.stepTotal = total || stageState.stepTotal;
+    stageState.lastRevealedStep = Math.max(stageState.lastRevealedStep, stageState.stepCurrent);
+    stageState.activeStepBanner = {
+      step: stageState.stepCurrent,
+      total: stageState.stepTotal,
+      symbol: meta.symbol || '⚗️',
+      name: meta.name || matId,
+      color: col,
+      timer: 1.15
+    };
+    stageState.raziBubbleText = `${stageState.stepCurrent}/${stageState.stepTotal}: ${meta.symbol} ${meta.name}`;
+    stageState.raziBubbleTimer = 2.0;
+
+    if (isDuelMode && p1Mat && p2Mat) {
+      stageState.sabThrowTimer = 0.52;
+      spawnBottleThrow(235, 152, p1Mat, 'Tabîb', 428);
+      spawnBottleThrow(645, 156, p2Mat, 'Sabuncuoğlu', 452);
+    } else {
+      spawnBottleThrow(235, 152, matId, 'Tabîb', 440);
+    }
+    flashButtonCard(matId);
+  }
+
+  function triggerPlayerBottleThrow(matId) {
+    spawnBottleThrow(690, 325, matId, 'Sen', 440);
+  }
+
+  function triggerSabuncuogluVisit(forceReverseQuote, customGreeting) {
+    const sab = stageState.sabuncuoglu;
+    sab.state = 'ENTERING';
+    sab.x = 910;
+    sab.targetX = 655;
+    sab.facingLeft = true;
+    sab.timer = 0;
+    if (customGreeting) {
+      sab.quote = customGreeting;
+    } else if (forceReverseQuote) {
+      sab.quote = 'TERSİNE SIRA! Malzemeleri SONDAN BAŞA doğru kazana ekle!';
+    } else {
+      sab.quote = SABUNCUOGLU_QUOTES[Math.floor(Math.random() * SABUNCUOGLU_QUOTES.length)];
+    }
+  }
+
+  function drawRoundedRect(ctx, x, y, w, h, r) {
+    const radius = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + w, y, x + w, y + h, radius);
+    ctx.arcTo(x + w, y + h, x, y + h, radius);
+    ctx.arcTo(x, y + h, x, y, radius);
+    ctx.arcTo(x, y, x + w, y, radius);
+    ctx.closePath();
+  }
+
+  function drawSpeechBubble(ctx, anchorX, anchorY, text, borderColor) {
+    if (!text) return;
+    ctx.save();
+    ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
+    const maxWidth = 235;
+    const words = text.split(' ');
+    const lines = [];
+    let current = '';
+    for (const w of words) {
+      const test = current ? (current + ' ' + w) : w;
+      if (ctx.measureText(test).width > maxWidth && current) {
+        lines.push(current);
+        current = w;
+      } else {
+        current = test;
+      }
+    }
+    if (current) lines.push(current);
+
+    let boxW = 86;
+    for (const ln of lines) {
+      boxW = Math.max(boxW, ctx.measureText(ln).width + 22);
+    }
+    const lineH = 17;
+    const boxH = lines.length * lineH + 12;
+    const bx = Math.max(10, Math.min(870 - boxW, anchorX - boxW / 2));
+    const by = Math.max(44, anchorY - boxH - 10);
+
+    ctx.fillStyle = 'rgba(250, 245, 232, 0.95)';
+    ctx.strokeStyle = borderColor || '#7a5228';
+    ctx.lineWidth = 2;
+    drawRoundedRect(ctx, bx, by, boxW, boxH, 9);
+    ctx.fill();
+    ctx.stroke();
+
+    const tailX = Math.max(bx + 14, Math.min(bx + boxW - 14, anchorX));
+    ctx.beginPath();
+    ctx.moveTo(tailX - 6, by + boxH);
+    ctx.lineTo(tailX + 6, by + boxH);
+    ctx.lineTo(tailX, by + boxH + 7);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(250, 245, 232, 0.95)';
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#24150b';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], bx + boxW / 2, by + 13 + i * lineH);
+    }
+    ctx.restore();
+  }
+
+  function drawAlchemicalFlask(ctx, x, y, angle, color, symbol) {
+    const [r, g, b] = color;
+    const rLt = Math.min(255, r + 50);
+    const gLt = Math.min(255, g + 50);
+    const bLt = Math.min(255, b + 50);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Dış parıltı halesi
+    const halo = ctx.createRadialGradient(0, 2, 4, 0, 2, 26);
+    halo.addColorStop(0, `rgba(${rLt}, ${gLt}, ${bLt}, 0.85)`);
+    halo.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(0, 2, 26, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.rotate(angle);
+    // Tıpa (mantar)
+    ctx.fillStyle = '#8b5a2b';
+    drawRoundedRect(ctx, -4, -19, 8, 5, 2);
+    ctx.fill();
+
+    // Şişe boynu
+    ctx.fillStyle = 'rgba(215, 235, 248, 0.85)';
+    ctx.fillRect(-5, -14, 10, 7);
+
+    // Şişe gövdesi (renkli iksir sıvısı)
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    drawRoundedRect(ctx, -13, -7, 26, 24, 7);
+    ctx.fill();
+    ctx.stroke();
+
+    // Üst sıvı parlaması
+    ctx.fillStyle = `rgb(${rLt}, ${gLt}, ${bLt})`;
+    drawRoundedRect(ctx, -11, -5, 22, 8, 4);
+    ctx.fill();
+
+    // Cam yansıması
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    drawRoundedRect(ctx, -9, -3, 4, 13, 2);
+    ctx.fill();
+
+    ctx.rotate(-angle);
+    ctx.font = 'bold 15px "Segoe UI Emoji", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(symbol, 0, 5);
+    ctx.restore();
+  }
+
+  function drawSabuncuogluTable(ctx, cx, floorY) {
+    const tw = 92, th = 44;
+    const tx = cx - tw / 2;
+    const ty = floorY - th + 2;
+    ctx.save();
+    ctx.fillStyle = '#2d1c12';
+    drawRoundedRect(ctx, tx, ty + 10, tw, th - 10, 3);
+    ctx.fill();
+    ctx.fillStyle = '#442c1c';
+    drawRoundedRect(ctx, tx + 3, ty + 13, tw - 6, th - 15, 2);
+    ctx.fill();
+    ctx.fillStyle = '#5c3a24';
+    drawRoundedRect(ctx, tx - 4, ty + 5, tw + 8, 8, 2);
+    ctx.fill();
+    // Havan & zümrüt şişe
+    ctx.fillStyle = '#c3962d';
+    ctx.fillRect(tx + 10, ty, 12, 6);
+    ctx.fillStyle = '#1c7d4b';
+    ctx.fillRect(tx + 30, ty - 5, 9, 10);
+    ctx.restore();
+  }
+
+  let lastStageTime = performance.now();
+  function renderStageLoop(now) {
+    const dt = Math.min(0.08, (now - lastStageTime) / 1000);
+    lastStageTime = now;
+
+    if (stageCanvas) {
+      const ctx = stageCanvas.getContext('2d');
+      const W = stageCanvas.width;
+      const H = stageCanvas.height;
+      const floorY = 324;
+
+      for (let c = 0; c < 3; c++) {
+        stageState.cauldronColor[c] += (stageState.targetCauldronColor[c] - stageState.cauldronColor[c]) * Math.min(1, dt * 6);
+      }
+      if (stageState.surgeTimer > 0) stageState.surgeTimer = Math.max(0, stageState.surgeTimer - dt);
+      if (stageState.raziThrowTimer > 0) stageState.raziThrowTimer = Math.max(0, stageState.raziThrowTimer - dt);
+      if (stageState.sabThrowTimer > 0) stageState.sabThrowTimer = Math.max(0, stageState.sabThrowTimer - dt);
+      if (stageState.raziBubbleTimer > 0) stageState.raziBubbleTimer = Math.max(0, stageState.raziBubbleTimer - dt);
+      if (stageState.activeStepBanner && stageState.activeStepBanner.timer > 0) {
+        stageState.activeStepBanner.timer = Math.max(0, stageState.activeStepBanner.timer - dt);
+      }
+
+      ctx.save();
+      if (stageState.shakeTimer > 0) {
+        stageState.shakeTimer = Math.max(0, stageState.shakeTimer - dt);
+        const sx = (Math.random() - 0.5) * stageState.shakeIntensity;
+        const sy = (Math.random() - 0.5) * stageState.shakeIntensity;
+        ctx.translate(sx, sy);
+      }
+
+      // 1. Arka Plan (Konya Dârüşşifası — Gemini logosuz temiz görsel)
+      if (stageAssets.bg.complete && stageAssets.bg.naturalWidth > 0) {
+        ctx.drawImage(stageAssets.bg, 0, 0, W, H);
+      } else {
+        const g = ctx.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, '#1e130c');
+        g.addColorStop(1, '#0c0704');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      // Meşale titremesi
+      const flicker = 0.04 + Math.sin(now * 0.007) * 0.02;
+      ctx.fillStyle = `rgba(255, 165, 60, ${flicker.toFixed(3)})`;
+      ctx.fillRect(0, 0, W, H);
+
+      // 2. Tabîb Ekmeleddin (Bey Hekim) Sprite (6 kare, 280x230)
+      // Fırlatma anında 5. kare (kolunu kaldırıp kazana şişe attığı poz), normalde nefes alma döngüsü
+      const raziFrame = stageState.raziThrowTimer > 0.08
+        ? 5
+        : IDLE_RAZ_LOOP[Math.floor(now / 260) % IDLE_RAZ_LOOP.length];
+      const raziLungeX = stageState.raziThrowTimer > 0 ? Math.sin((stageState.raziThrowTimer / 0.52) * Math.PI) * 14 : 0;
+      const raziW = 248;
+      const raziH = 204;
+      const raziX = (isDuelMode ? 76 : 95) + raziLungeX;
+      const raziY = floorY - raziH;
+
+      if (stageAssets.razi.complete && stageAssets.razi.naturalWidth > 0) {
+        ctx.drawImage(
+          stageAssets.razi,
+          raziFrame * 280, 0, 280, 230,
+          raziX, raziY, raziW, raziH
+        );
+      }
+
+      // 3. Kazan Işıltısı + Kazan Sprite (6 kare, 180x240)
+      const [cr, cg, cb] = stageState.cauldronColor.map(v => Math.round(v));
+      const cauldronGlow = ctx.createRadialGradient(440, 208, 12, 440, 208, stageState.surgeTimer > 0 ? 150 : 108);
+      cauldronGlow.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${stageState.surgeTimer > 0 ? 0.58 : 0.36})`);
+      cauldronGlow.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0)`);
+      ctx.fillStyle = cauldronGlow;
+      ctx.beginPath();
+      ctx.arc(440, 208, 150, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (const b of stageState.ambientBubbles) {
+        b.y -= b.vy * dt;
+        b.wobble += dt * 3.5;
+        if (b.y < 105) {
+          b.y = 192;
+          b.x = 440 + (Math.random() - 0.5) * 76;
+        }
+        const bx = b.x + Math.sin(b.wobble) * 5;
+        const alpha = Math.max(0, Math.min(0.78, (b.y - 105) / 85));
+        ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha.toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(bx, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const cauldronSheet = (stageState.surgeTimer > 0 && stageAssets.cauldronSurge.complete && stageAssets.cauldronSurge.naturalWidth > 0)
+        ? stageAssets.cauldronSurge
+        : stageAssets.cauldronNormal;
+      const cauldronFrame = Math.floor(now / (stageState.surgeTimer > 0 ? 90 : 140)) % 6;
+      const caulW = 172, caulH = 228;
+      if (cauldronSheet.complete && cauldronSheet.naturalWidth > 0) {
+        ctx.drawImage(
+          cauldronSheet,
+          cauldronFrame * 180, 0, 180, 240,
+          440 - caulW / 2, floorY - caulH + 4, caulW, caulH
+        );
+      }
+
+      // 4. Sabuncuoğlu Şerefeddin (1v1 Düelloda sağda sabit usta, Tek Kişilikte misafir & Tersine Sıra ustası)
+      const sab = stageState.sabuncuoglu;
+      sab.animTime += dt;
+      if (isDuelMode) {
+        if (stageAssets.sabuncuoglu.complete && stageAssets.sabuncuoglu.naturalWidth > 0) {
+          const row = stageState.sabThrowTimer > 0.08 ? 1 : 3;
+          const frames = row === 1 ? 8 : 4;
+          const colIdx = Math.floor(sab.animTime * (row === 1 ? 12 : 5)) % frames;
+          const dw = 128, dh = 188;
+          const dx = 635, dy = floorY - dh;
+          ctx.drawImage(stageAssets.sabuncuoglu, colIdx * 114, row * 168, 114, 168, dx, dy, dw, dh);
+          drawSabuncuogluTable(ctx, dx + dw / 2, floorY);
+        }
+      } else {
+        if (!isReverseRound && sab.state === 'HIDDEN') {
+          sab.nextVisitCooldown -= dt;
+          if (sab.nextVisitCooldown <= 0) {
+            sab.nextVisitCooldown = 26 + Math.random() * 18;
+            triggerSabuncuogluVisit(false);
+          }
+        }
+        if (sab.state !== 'HIDDEN') {
+          let row = 3, frames = 4, fps = 6;
+          if (sab.state === 'ENTERING') {
+            row = 0; frames = 8; fps = 11;
+            sab.facingLeft = true;
+            sab.x -= 135 * dt;
+            if (sab.x <= sab.targetX) {
+              sab.x = sab.targetX;
+              sab.state = 'WAVING';
+              sab.timer = 1.6;
+            }
+          } else if (sab.state === 'WAVING') {
+            row = 1; frames = 8; fps = 9;
+            sab.timer -= dt;
+            if (sab.timer <= 0) {
+              sab.state = isReverseRound ? 'IDLE_REVERSE' : 'TALKING';
+              sab.timer = isReverseRound ? 999 : 4.0;
+            }
+          } else if (sab.state === 'TALKING') {
+            row = 2; frames = 4; fps = 7;
+            sab.timer -= dt;
+            if (sab.timer <= 0) {
+              if (isReverseRound) {
+                sab.state = 'IDLE_REVERSE';
+              } else {
+                sab.state = 'LEAVING';
+                sab.facingLeft = false;
+              }
+            }
+          } else if (sab.state === 'IDLE_REVERSE') {
+            row = 2; frames = 4; fps = 6;
+            if (!isReverseRound) {
+              sab.state = 'LEAVING';
+              sab.facingLeft = false;
+            }
+          } else if (sab.state === 'LEAVING') {
+            row = 0; frames = 8; fps = 11;
+            sab.x += 140 * dt;
+            if (sab.x >= 920) {
+              sab.state = 'HIDDEN';
+            }
+          }
+
+          if (stageAssets.sabuncuoglu.complete && stageAssets.sabuncuoglu.naturalWidth > 0) {
+            const colIdx = Math.floor(sab.animTime * fps) % frames;
+            const sw = 114, sh = 168;
+            const dw = 126, dh = 186;
+            const dy = floorY - dh;
+            ctx.save();
+            if (!sab.facingLeft) {
+              ctx.translate(sab.x + dw, dy);
+              ctx.scale(-1, 1);
+              ctx.drawImage(stageAssets.sabuncuoglu, colIdx * sw, row * sh, sw, sh, 0, 0, dw, dh);
+            } else {
+              ctx.drawImage(stageAssets.sabuncuoglu, colIdx * sw, row * sh, sw, sh, sab.x, dy, dw, dh);
+            }
+            ctx.restore();
+
+            if (sab.state === 'WAVING' || sab.state === 'TALKING' || sab.state === 'IDLE_REVERSE') {
+              drawSpeechBubble(ctx, sab.x + 63, dy - 4, sab.quote, '#2d6a4f');
+            }
+          }
+        }
+      }
+
+      // 5. Fırlatılan İksir Şişeleri (Parabolik Yörünge + Cam İksir Şişesi Çizimi)
+      for (let i = stageState.bottles.length - 1; i >= 0; i--) {
+        const b = stageState.bottles[i];
+        b.t += dt / b.duration;
+        const p = Math.min(1, b.t);
+        const curX = b.startX + (b.endX - b.startX) * p;
+        const linearY = b.startY + (b.endY - b.startY) * p;
+        const arcOffset = -4 * p * (1 - p) * (Math.max(b.startY, b.endY) - b.peakY);
+        const curY = linearY + arcOffset;
+
+        if (Math.random() < 0.85) {
+          stageState.particles.push({
+            x: curX,
+            y: curY,
+            vx: (Math.random() - 0.5) * 32,
+            vy: (Math.random() - 0.5) * 32,
+            r: 2.2 + Math.random() * 2.8,
+            color: b.color,
+            alpha: 0.95,
+            life: 0.28
+          });
+        }
+
+        drawAlchemicalFlask(ctx, curX, curY, p * Math.PI * 1.6, b.color, b.symbol);
+
+        if (b.t >= 1) {
+          stageState.targetCauldronColor = b.color.slice();
+          stageState.surgeTimer = 0.72;
+          spawnCauldronSplash(b.color, 28);
+          stageState.popups.push({
+            x: b.endX,
+            y: b.endY - 22,
+            text: `${b.symbol} ${b.name}`,
+            color: b.color,
+            alpha: 1,
+            life: 1.05
+          });
+          stageState.bottles.splice(i, 1);
+        }
+      }
+
+      // 6. Patlama / Sıçrama Parçacıkları
+      for (let i = stageState.particles.length - 1; i >= 0; i--) {
+        const pt = stageState.particles[i];
+        pt.x += pt.vx * dt;
+        pt.y += pt.vy * dt;
+        pt.vy += 220 * dt;
+        pt.life -= dt;
+        if (pt.life <= 0) {
+          stageState.particles.splice(i, 1);
+          continue;
+        }
+        const a = Math.max(0, Math.min(1, pt.life * 2));
+        ctx.fillStyle = `rgba(${pt.color[0]}, ${pt.color[1]}, ${pt.color[2]}, ${a.toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 7. Kazan Üstü Yükselen İsim Etiketleri
+      for (let i = stageState.popups.length - 1; i >= 0; i--) {
+        const pop = stageState.popups[i];
+        pop.y -= 38 * dt;
+        pop.life -= dt;
+        if (pop.life <= 0) {
+          stageState.popups.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, pop.life * 1.4));
+        ctx.font = 'bold 16px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#140c06';
+        ctx.fillText(pop.text, pop.x + 1.5, pop.y + 1.5);
+        ctx.fillStyle = '#fff5d6';
+        ctx.fillText(pop.text, pop.x, pop.y);
+        ctx.restore();
+      }
+
+      // 8. Tabîb Ekmeleddin Konuşma Balonu (Aktif adım kartı yokken gösterilir)
+      const hasStepCard = stageState.activeStepBanner && stageState.activeStepBanner.timer > 0;
+      if (!hasStepCard && stageState.raziBubbleTimer > 0 && stageState.raziBubbleText) {
+        drawSpeechBubble(ctx, raziX + 120, raziY + 8, stageState.raziBubbleText, '#b07d2b');
+      }
+
+      // 9. Aktif Atılan Cevher Vitrin Kartı (Üst Orta — Çok Net ve Büyük)
+      if (hasStepCard) {
+        const sb = stageState.activeStepBanner;
+        const [sr, sg, sbCol] = sb.color;
+        ctx.save();
+        const cardW = 280, cardH = 44;
+        const cardX = W / 2 - cardW / 2;
+        const cardY = 10;
+        ctx.fillStyle = 'rgba(18, 11, 6, 0.94)';
+        ctx.strokeStyle = `rgb(${sr}, ${sg}, ${sbCol})`;
+        ctx.lineWidth = 2.5;
+        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 12px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`ADIM ${sb.step} / ${sb.total}`, W / 2, cardY + 14);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 18px "Segoe UI", sans-serif';
+        ctx.fillText(`${sb.symbol}  ${sb.name.toUpperCase()}`, W / 2, cardY + 33);
+        ctx.restore();
+      }
+
+      // 10. Sahne Üst Bilgi Rozetleri (Seviye & Faz & Adım Noktaları)
+      ctx.save();
+      ctx.fillStyle = 'rgba(18, 12, 7, 0.86)';
+      ctx.strokeStyle = 'rgba(218, 168, 72, 0.7)';
+      ctx.lineWidth = 1.5;
+      drawRoundedRect(ctx, 10, 10, 124, 30, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f8d57e';
+      ctx.font = 'bold 13px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`SEVİYE ${String(stageState.level).padStart(2, '0')}`, 72, 25);
+
+      ctx.font = 'bold 12px "Segoe UI", sans-serif';
+      const phaseW = Math.max(142, ctx.measureText(stageState.phaseLabel).width + 24);
+      drawRoundedRect(ctx, W - phaseW - 10, 10, phaseW, 30, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = isReverseRound ? '#e9d5ff' : '#fde68a';
+      ctx.fillText(stageState.phaseLabel, W - phaseW / 2 - 10, 25);
+
+      // Alt orta sıra adımı göstergesi
+      if (stageState.stepTotal > 0) {
+        const dotCount = Math.min(14, stageState.stepTotal);
+        const spacing = 18;
+        const totalW = (dotCount - 1) * spacing;
+        const startX = W / 2 - totalW / 2;
+        const dotY = H - 14;
+
+        ctx.fillStyle = 'rgba(14, 9, 5, 0.84)';
+        drawRoundedRect(ctx, startX - 18, dotY - 10, totalW + 36, 20, 10);
+        ctx.fill();
+
+        for (let i = 0; i < dotCount; i++) {
+          const active = (i + 1) <= stageState.stepCurrent;
+          ctx.beginPath();
+          ctx.arc(startX + i * spacing, dotY, active ? 5.5 : 4, 0, Math.PI * 2);
+          ctx.fillStyle = active ? '#4ade80' : 'rgba(226, 176, 74, 0.35)';
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    requestAnimationFrame(renderStageLoop);
+  }
+  requestAnimationFrame(renderStageLoop);
+
+  // ── WebSocket ve Oda Eşleştirme (Matchmaking) Yönetimi ──
+  let autoStartSingleOnPrologue = false;
+
+  async function requestMatchmaking(mode, customRoomCode = '') {
+    try {
+      clearFallbackStepTimers();
+      statusEl.textContent = mode === 'duel'
+        ? '1v1 Çırak Düellosu odası hazırlanıyor…'
+        : 'Tek Kişilik Dârüşşifa başlatılıyor…';
+      statusEl.className = 'status';
+      autoStartSingleOnPrologue = (mode === 'single');
+      const q = new URLSearchParams({ mode });
+      if (customRoomCode) q.set('room', customRoomCode);
+      const res = await fetch(`/api/matchmake?${q.toString()}`, { method: 'POST' });
+      const data = await res.json();
+      if (data && data.ok && data.room_id) {
+        if (modeSelectModal) modeSelectModal.classList.add('hidden');
+        connectToRoom(data.room_id, data.mode || mode);
+      }
+    } catch (err) {
+      statusEl.textContent = 'Sunucuya bağlanılamadı — lütfen tekrar deneyin.';
+      statusEl.className = 'status error';
+    }
+  }
+
+  function showModeSelectScreen() {
+    clearFallbackStepTimers();
+    if (prologueModal) prologueModal.classList.add('hidden');
+    if (duelLobbyModal) duelLobbyModal.classList.add('hidden');
+    if (modeSelectModal) modeSelectModal.classList.remove('hidden');
+  }
+
+  if (openModeSelectBtn) {
+    openModeSelectBtn.addEventListener('click', () => {
+      if (closeModeSelectBtn) closeModeSelectBtn.style.display = roomId ? 'inline-block' : 'none';
+      if (modeSelectModal) modeSelectModal.classList.remove('hidden');
+      playTone(560, 'sine', 0.08, 0.08);
+    });
+  }
+  if (closeModeSelectBtn) {
+    closeModeSelectBtn.addEventListener('click', () => {
+      if (modeSelectModal) modeSelectModal.classList.add('hidden');
+    });
+  }
+  if (selectSingleModeBtn) {
+    selectSingleModeBtn.addEventListener('click', () => {
+      initAudio();
+      if (navigator.vibrate) navigator.vibrate(25);
+      playTone(640, 'sine', 0.1, 0.1);
+      requestMatchmaking('single');
+    });
+  }
+  if (selectDuelModeBtn) {
+    selectDuelModeBtn.addEventListener('click', () => {
+      initAudio();
+      if (navigator.vibrate) navigator.vibrate(25);
+      playTone(720, 'sine', 0.1, 0.1);
+      requestMatchmaking('duel');
+    });
+  }
+  if (prologueBackToModeBtn) {
+    prologueBackToModeBtn.addEventListener('click', showModeSelectScreen);
+  }
+  if (duelBackToModeBtn) {
+    duelBackToModeBtn.addEventListener('click', showModeSelectScreen);
+  }
+  if (openCreditsFromModeBtn) {
+    openCreditsFromModeBtn.addEventListener('click', () => openCredits(false));
+  }
+  if (openBioFromModeBtn && ekmeleddinBioModal) {
+    openBioFromModeBtn.addEventListener('click', () => ekmeleddinBioModal.classList.remove('hidden'));
+  }
+  if (joinFriendRoomBtn && joinFriendRoomInput) {
+    joinFriendRoomBtn.addEventListener('click', () => {
+      const code = joinFriendRoomInput.value.trim().toUpperCase();
+      if (!code) return;
+      requestMatchmaking('duel', code);
+    });
+  }
+
+  function connectToRoom(targetRoomId, modeHint) {
+    if (!targetRoomId) return;
+    clearFallbackStepTimers();
+    if (socket) {
+      try {
+        socket.onclose = null;
+        socket.close();
+      } catch (e) {}
+    }
+
+    roomId = targetRoomId.trim().toUpperCase();
+    if (roomCodeEl) roomCodeEl.textContent = roomId;
+    if (duelLobbyRoomCode) duelLobbyRoomCode.textContent = roomId;
+    if (modeHint) isDuelMode = (modeHint === 'duel');
+
+    try {
+      const newUrl = `/play?room=${encodeURIComponent(roomId)}&mode=${encodeURIComponent(modeHint || (isDuelMode ? 'duel' : 'single'))}`;
+      window.history.replaceState({ roomId }, '', newUrl);
+    } catch (e) {}
+
+    const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+    const modeParam = modeHint ? `?mode=${encodeURIComponent(modeHint)}` : '';
+    socket = new WebSocket(`${protocol}://${location.host}/ws/${roomId}${modeParam}`);
+
+    socket.addEventListener('open', () => {
+      statusEl.textContent = 'Dârüşşifaya bağlanıldı — Tabîb Ekmeleddin hazır!';
+      statusEl.className   = 'status';
+      sendLobbyUpdate();
+    });
+
+    socket.addEventListener('close', () => {
+      statusEl.textContent = 'Bağlantı kesildi — tekrar bağlanmak için Mod butonuna dokunun.';
+      statusEl.className   = 'status error';
+      gridEl.classList.add('disabled');
+      timerWrap.classList.remove('visible');
+    });
+
+    socket.addEventListener('message', handleServerMessage);
+  }
+
+  function handleServerMessage(event) {
     const msg = JSON.parse(event.data);
     if (msg.type === 'ping') return;
+
+    if (msg.type === 'choose_mode') {
+      showModeSelectScreen();
+      return;
+    }
 
     // ── Bağlantı & Lobi Mesajları ──
     if (msg.type === 'connected') {
       myPlayerId  = msg.player_id || 'player_1';
       myPlayerNum = msg.player_num || 1;
-      if (msg.mode) isDuelMode = (msg.mode === 'duel');
+      if (msg.mode && msg.mode !== 'undecided') {
+        isDuelMode = (msg.mode === 'duel');
+      }
       if (!localStorage.getItem('razi_nickname')) {
         myName = `Çırak ${myPlayerNum}`;
         if (duelNickname) duelNickname.value = myName;
@@ -2726,32 +4157,43 @@
       }
       if (myDuelName) myDuelName.textContent = myName;
       if (myDuelEmblem) myDuelEmblem.textContent = myEmblem;
+      if (duelLobbyRoomCode) duelLobbyRoomCode.textContent = roomId;
       sendLobbyUpdate();
+
+      if (msg.mode === 'undecided') {
+        showModeSelectScreen();
+        return;
+      }
 
       if (isDuelMode || msg.player_count >= 2) {
         isDuelMode = true;
+        stageState.phaseLabel = '1v1 Düello Lobisi';
         if (duelLobbyModal) duelLobbyModal.classList.remove('hidden');
         if (msg.player_count === 1) {
-          statusEl.textContent = '1. Çırak bağlandı! 2. Çırak bekleniyor... (1/2)';
+          statusEl.textContent = '1. Çırak bağlandı! 2. Çırak QR okutunca düello başlayacak (1/2)';
           if (lobbyOppName) lobbyOppName.textContent = '2. Çırak Bekleniyor...';
           if (lobbyOppStatus) {
             lobbyOppStatus.textContent = 'QR Bekleniyor ⏳';
             lobbyOppStatus.classList.remove('ready');
           }
         } else {
-          statusEl.textContent = 'İki çırak da bağlandı! Amblem seçip Hazırım\'a basın.';
+          statusEl.textContent = 'İki çırak da bağlandı! Hazırım butonuna basın.';
           updateOpponentLobbyInfo(msg.players);
         }
+      } else {
+        stageState.phaseLabel = 'Tek Kişilik Macera';
       }
     }
 
-    if (msg.type === 'opponent_joined' || msg.type === 'player_connected') {
-      if (msg.player_count >= 2) {
+    if (msg.type === 'duel_lobby_state' || msg.type === 'opponent_joined' || msg.type === 'player_connected') {
+      if (msg.mode === 'duel' || msg.player_count >= 2) {
         isDuelMode = true;
-        statusEl.textContent = 'İki çırak da bağlandı! Amblem seçip Hazırım\'a basın.';
         if (duelLobbyModal) duelLobbyModal.classList.remove('hidden');
-        updateOpponentLobbyInfo(msg.players);
-        playTone(700, 'sine', 0.15, 0.1);
+        if (msg.player_count >= 2) {
+          statusEl.textContent = 'İki çırak da bağlandı! Hazırım butonuna basın.';
+          updateOpponentLobbyInfo(msg.players);
+          playTone(700, 'sine', 0.15, 0.1);
+        }
       }
     }
 
@@ -2765,15 +4207,14 @@
     }
 
     if (msg.type === 'opponent_left') {
-      isDuelMode = false;
-      if (duelLobbyModal) duelLobbyModal.classList.add('hidden');
-      if (duelOpponentBar) duelOpponentBar.classList.add('hidden');
-      statusEl.textContent = 'Rakip ayrıldı. Tek kişilik moda dönüldü.';
-      statusEl.className = 'status';
-      if (lobbyOppName) lobbyOppName.textContent = 'Bekleniyor...';
-      if (lobbyOppStatus) {
-        lobbyOppStatus.textContent = 'Bekleniyor...';
-        lobbyOppStatus.classList.remove('ready');
+      if (isDuelMode) {
+        statusEl.textContent = 'Rakip ayrıldı. Yeni rakip bekleniyor veya mod değiştirebilirsiniz.';
+        statusEl.className = 'status';
+        if (lobbyOppName) lobbyOppName.textContent = '2. Çırak Bekleniyor...';
+        if (lobbyOppStatus) {
+          lobbyOppStatus.textContent = 'Bekleniyor... ⏳';
+          lobbyOppStatus.classList.remove('ready');
+        }
       }
     }
 
@@ -2787,6 +4228,19 @@
 
     // ── Prologue (Anlatım) Mesajı ──
     if (msg.type === 'prologue') {
+      if (modeSelectModal) modeSelectModal.classList.add('hidden');
+      if (duelLobbyModal) duelLobbyModal.classList.add('hidden');
+      gridEl.classList.add('disabled');
+      timerWrap.classList.remove('visible');
+
+      // Tek kişilik mod seçildiyse ikinci bir modal ile bekletmeden doğrudan 3-2-1 geri sayımı başlat!
+      if (autoStartSingleOnPrologue && socket && socket.readyState === WebSocket.OPEN) {
+        autoStartSingleOnPrologue = false;
+        if (prologueModal) prologueModal.classList.add('hidden');
+        socket.send(JSON.stringify({ type: 'start_game', player_id: myPlayerId }));
+        return;
+      }
+
       if (prologueModal) {
         prologueModal.classList.remove('hidden');
         if (prologueText) prologueText.textContent = msg.text || '';
@@ -2797,9 +4251,6 @@
           prologueStartBtn.style.opacity = '1';
         }
       }
-      if (duelLobbyModal) duelLobbyModal.classList.add('hidden');
-      gridEl.classList.add('disabled');
-      timerWrap.classList.remove('visible');
       playTone(600, 'sine', 0.2, 0.1);
     }
 
@@ -2808,7 +4259,7 @@
       const count = msg.count;
       const label = msg.label || (count === 0 ? 'BAŞLA!' : String(count));
 
-      // Açık olabilecek pencereleri kapat
+      if (modeSelectModal) modeSelectModal.classList.add('hidden');
       if (prologueModal) {
         prologueModal.classList.add('hidden');
         if (prologueStartBtn) {
@@ -2823,24 +4274,42 @@
       if (duelLobbyModal) duelLobbyModal.classList.add('hidden');
       if (duelMatchOverModal) duelMatchOverModal.classList.add('hidden');
 
+      stageState.phaseLabel = count === 0 ? 'İksir Başlıyor!' : `Hazırlan: ${label}`;
       showCountdown(count, label);
     }
 
     // ── Oyun Turu Mesajları ──
     if (msg.type === 'round_started') {
+      clearFallbackStepTimers();
       hideCountdown();
       if (countdownOverlay) countdownOverlay.classList.add('hidden');
+      if (modeSelectModal) modeSelectModal.classList.add('hidden');
       isReverseRound = !!msg.is_reverse;
-      const sabBanner = document.getElementById('sabuncuogluBanner');
+      stageState.level = msg.level || stageState.level || 1;
+      stageState.stepCurrent = 0;
+      stageState.lastRevealedStep = 0;
+      stageState.stepTotal = msg.seq_len || 0;
+      stageState.activeStepBanner = null;
+      if (stageWrap) stageWrap.classList.add('watch-mode');
+
       if (isReverseRound) {
-        if (sabBanner) sabBanner.classList.remove('hidden');
-        statusEl.textContent = 'SABUNCUOĞLU ŞEREFEDDİN: "Malzemeleri SONDAN BAŞA (TERSTEN) ekle! (4x Süre)"';
+        statusEl.textContent = '🔄 SABUNCUOĞLU: "Malzemeleri SONDAN BAŞA (TERSTEN) ekle!"';
         statusEl.className   = 'status reverse';
+        stageState.phaseLabel = '🔄 Tersine Sıra! (İzle)';
+        triggerSabuncuogluVisit(true);
       } else {
-        if (sabBanner) sabBanner.classList.add('hidden');
-        statusEl.textContent = 'Tabîb Ekmeleddin hazırlanıyor… (İzle)';
+        statusEl.textContent = '👀 Tabîb Ekmeleddin kazana malzemeleri atıyor… (İzle)';
         statusEl.className   = 'status';
+        stageState.phaseLabel = '👀 Tabîb Gösteriyor';
+        if (msg.sabuncuoglu_greeting) {
+          triggerSabuncuogluVisit(false, msg.sabuncuoglu_greeting);
+        }
       }
+      stageState.raziBubbleText = msg.recipe
+        ? `Tarihi Reçete: ${msg.recipe}`
+        : `Seviye ${stageState.level}: Kazana attığım cevherleri izle!`;
+      stageState.raziBubbleTimer = 2.2;
+
       gridEl.classList.add('disabled');
       timerWrap.classList.remove('visible');
       resetBtn.classList.remove('visible');
@@ -2878,16 +4347,6 @@
       if (msg.lives !== undefined && !isDuelMode) updateLives(msg.lives);
       if (msg.combo !== undefined) updateCombo(msg.combo);
 
-      // Tarihi reçete banner kontrolü
-      if (msg.recipe) {
-        recipeTitle.textContent = msg.recipe;
-        recipeBanner.classList.remove('hidden');
-        playMilestoneFanfare();
-      } else {
-        recipeBanner.classList.add('hidden');
-      }
-
-      // Açılan elementler
       if (msg.unlocked && Array.isArray(msg.unlocked)) {
         unlockedList = msg.unlocked;
         saveDiscovered(unlockedList);
@@ -2896,45 +4355,81 @@
         if (savedCount >= 30) unlockAchievement("grand_scholar");
         renderButtons();
       }
+
+      // Garantili Adım Zamanlayıcısı (WebSocket gecikse bile Ekmeleddin şişeleri zamanında fırlatır)
+      const seqArr = isDuelMode
+        ? (myPlayerId === 'player_2' ? msg.p2_sequence : msg.p1_sequence)
+        : msg.sequence;
+      const revDurMs = Math.max(550, (msg.reveal_duration || 1.25) * 1000);
+      if (Array.isArray(seqArr) && seqArr.length > 0) {
+        seqArr.forEach((matId, idx) => {
+          const stepNum = idx + 1;
+          const tid = setTimeout(() => {
+            if (stageState.lastRevealedStep < stepNum) {
+              const meta = getElementMeta(matId);
+              statusEl.textContent = isReverseRound
+                ? `Tabîb Ekliyor (${stepNum}/${seqArr.length}): ${meta.symbol} ${meta.name} [TERSTEN!]`
+                : `Tabîb Kazana Ekliyor (${stepNum}/${seqArr.length}): ${meta.symbol} ${meta.name}`;
+              playTone(350 + (stepNum * 35), 'sine', 0.12, 0.08);
+              const p1M = (msg.p1_sequence && msg.p1_sequence[idx]) || matId;
+              const p2M = (msg.p2_sequence && msg.p2_sequence[idx]) || matId;
+              triggerRaziBottleThrow(matId, stepNum, seqArr.length, p1M, p2M);
+            }
+          }, 680 + idx * revDurMs);
+          stageState.fallbackStepTimers.push(tid);
+        });
+      }
     }
 
     if (msg.type === 'reveal_step') {
       if (!msg.target || msg.target === myPlayerId) {
+        if (stageState.lastRevealedStep >= msg.step) return;
+        const meta = getElementMeta(msg.material);
+        const dispName = msg.name || meta.name;
         if (isReverseRound) {
-          statusEl.textContent = `Tabîb Ekmeleddin Ekliyor (${msg.step}/${msg.total}): ${msg.name} [DİKKAT: TERSTEN DOLDUR!]`;
+          statusEl.textContent = `Tabîb Ekliyor (${msg.step}/${msg.total}): ${meta.symbol} ${dispName} [TERSTEN!]`;
           statusEl.className   = 'status reverse';
         } else {
-          statusEl.textContent = `Tabîb Ekmeleddin Kazana Ekliyor (${msg.step}/${msg.total}): ${msg.name}`;
+          statusEl.textContent = `Tabîb Kazana Ekliyor (${msg.step}/${msg.total}): ${meta.symbol} ${dispName}`;
           statusEl.className   = 'status';
         }
         playTone(350 + (msg.step * 35), 'sine', 0.12, 0.08);
-
-        // İlgili butonu ekranda hafifçe parlat
-        const btn = document.querySelector(`[data-id="${msg.material}"]`);
-        if (btn) {
-          btn.classList.add('flash');
-          setTimeout(() => btn.classList.remove('flash'), 300);
-        }
+        triggerRaziBottleThrow(msg.material, msg.step, msg.total, msg.p1_material, msg.p2_material);
       }
     }
 
     if (msg.type === 'player_turn') {
-      const sabBanner = document.getElementById('sabuncuogluBanner');
+      clearFallbackStepTimers();
+      if (stageWrap) stageWrap.classList.remove('watch-mode');
+      stageState.stepCurrent = 0;
+      stageState.activeStepBanner = null;
       if (msg.is_reverse || isReverseRound) {
         isReverseRound = true;
-        if (sabBanner) sabBanner.classList.remove('hidden');
         statusEl.textContent = isDuelMode
-          ? 'SABUNCUOĞLU DÜELLOSU: SONDAN BAŞA (TERSTEN) DOLDUR! (4x Süre)'
-          : 'SABUNCUOĞLU SINAVI: Malzemeleri SONDAN BAŞA (TERSTEN) seç! (4x Süre)';
+          ? '🔄 SABUNCUOĞLU DÜELLOSU: SONDAN BAŞA (TERSTEN) SEÇ!'
+          : '🔄 SIRA SENDE: Malzemeleri SONDAN BAŞA (TERSTEN) seç!';
         statusEl.className   = 'status reverse-ready';
+        stageState.phaseLabel = '🔄 Sıra Sende (TERSTEN!)';
+        stageState.raziBubbleText = 'Şimdi SONDAN BAŞA doğru kazana ekle çırak!';
       } else {
-        if (sabBanner) sabBanner.classList.add('hidden');
-        statusEl.textContent = isDuelMode ? 'Hızlı Ol! Sırayı ilk tamamlayan kazanır!' : 'Sıra Sende! Malzemeleri seç.';
+        statusEl.textContent = isDuelMode
+          ? '⚔️ Hızlı Ol! Sırayı ilk tamamlayan raundu kazanır!'
+          : '🧪 Sıra Sende! Malzemeleri aynı sırayla kazana at.';
         statusEl.className   = 'status ready';
+        stageState.phaseLabel = '🧪 Sıra Sende!';
+        stageState.raziBubbleText = 'Sıra sende! Aynı sırayla malzemeleri kazana at.';
       }
+      stageState.raziBubbleTimer = 2.2;
       gridEl.classList.remove('disabled');
       timerTotal = msg.total || 0;
       updateTimer(timerTotal, timerTotal);
+    }
+
+    if (msg.type === 'player_step_ok') {
+      stageState.stepCurrent = msg.step || (stageState.stepCurrent + 1);
+      stageState.stepTotal = msg.total || stageState.stepTotal;
+      statusEl.textContent = `✅ Doğru (${stageState.stepCurrent}/${stageState.stepTotal}) — Sıradaki malzemeyi seç!`;
+      statusEl.className = 'status ready';
     }
 
     if (msg.type === 'timer_tick') {
@@ -2945,18 +4440,26 @@
     if (msg.type === 'duel_progress') {
       const pct = msg.total > 0 ? (msg.cursor / msg.total * 100).toFixed(1) : 0;
       if (msg.player_id === myPlayerId) {
+        stageState.stepCurrent = msg.cursor || stageState.stepCurrent;
+        stageState.stepTotal = msg.total || stageState.stepTotal;
         if (myDuelFill) myDuelFill.style.width = pct + '%';
         if (myDuelStatusText) myDuelStatusText.textContent = `Sen: ${msg.cursor}/${msg.total}`;
       } else {
         if (duelOppFill) duelOppFill.style.width = pct + '%';
         if (duelOppStatusText) duelOppStatusText.textContent = `Rakip: ${msg.cursor}/${msg.total}`;
         playBubbleTone(450, 520, 0.06);
+        if (msg.material) {
+          spawnBottleThrow(760, 290, msg.material, 'Rakip', 452);
+        }
       }
     }
 
     if (msg.type === 'stunned') {
       if (msg.target === myPlayerId || msg.player_id === myPlayerId) {
         isStunned = true;
+        stageState.shakeTimer = 0.45;
+        stageState.shakeIntensity = 9;
+        spawnCauldronSplash([235, 65, 65], 28);
         if (stunOverlay) stunOverlay.classList.remove('hidden');
         playFlaskCrack();
         if (navigator.vibrate) navigator.vibrate([120, 60, 160]);
@@ -3013,10 +4516,15 @@
       gridEl.classList.add('disabled');
       timerWrap.classList.remove('visible');
       const isWinner = msg.winner_id === myPlayerId;
+      stageState.surgeTimer = 1.1;
+      spawnCauldronSplash(isWinner ? [74, 222, 128] : [250, 204, 21], 32);
       if (isWinner) {
         playVictoryChime();
+        if (window.confetti) confetti({ particleCount: 45, spread: 60, origin: { y: 0.6 } });
         statusEl.textContent = `⭐ Tebrikler! Seviye ${msg.round_num || ''} galibi sensin!`;
         statusEl.className = 'status ready';
+        stageState.raziBubbleText = 'Aferin çırak! Bu turun iksirini en hızlı sen hazırladın!';
+        stageState.raziBubbleTimer = 2.8;
         if (navigator.vibrate) navigator.vibrate([80, 40, 120]);
       } else {
         playFlaskCrack();
@@ -3078,6 +4586,7 @@
       if (duelMatchOverModal) duelMatchOverModal.classList.remove('hidden');
       if (isMatchWinner) {
         playMilestoneFanfare();
+        if (window.confetti) confetti({ particleCount: 80, spread: 80, origin: { y: 0.5 } });
         if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 250]);
       } else {
         playFlaskCrack();
@@ -3114,12 +4623,21 @@
     }
 
     if (msg.type === 'round_success') {
-      const sabBanner = document.getElementById('sabuncuogluBanner');
-      if (sabBanner) sabBanner.classList.add('hidden');
+      clearFallbackStepTimers();
+      gridEl.classList.add('disabled');
+      timerWrap.classList.remove('visible');
       if (msg.combo !== undefined) updateCombo(msg.combo);
       if (msg.lives !== undefined) updateLives(msg.lives);
 
-      // Başarımları denetle
+      stageState.surgeTimer = 1.1;
+      stageState.targetCauldronColor = [74, 222, 128];
+      spawnCauldronSplash([74, 222, 128], 34);
+      stageState.phaseLabel = '✨ Şifa İksiri Tamam!';
+      stageState.raziBubbleText = msg.combo >= 2
+        ? `Maşallah! Arka arkaya x${msg.combo} kusursuz terkip!`
+        : 'Harika! İksir tam kıvamında kaynadı!';
+      stageState.raziBubbleTimer = 2.4;
+
       if (msg.level >= 2)   unlockAchievement("first_drop");
       if (msg.level >= 10)  unlockAchievement("apprentice");
       if (msg.level >= 50)  unlockAchievement("master_physician");
@@ -3127,15 +4645,27 @@
       if (msg.recipe_completed) unlockAchievement("recipe_master");
       if (msg.lives === 1)  unlockAchievement("clutch_win");
 
+      if (window.confetti && (msg.combo >= 3 || msg.level % 5 === 0)) {
+        confetti({ particleCount: 40, spread: 60, origin: { y: 0.65 } });
+      }
+
       playVictoryChime();
       statusEl.textContent = msg.combo >= 2
-        ? `Mükemmel! 🔥 x${msg.combo} Kombo!`
-        : 'Doğru! Tabîb Ekmeleddin onaylıyor.';
+        ? `Mükemmel! 🔥 x${msg.combo} Kombo! Sonraki seviye hazırlanıyor…`
+        : '✨ Doğru! Tabîb Ekmeleddin onaylıyor.';
       statusEl.className = 'status ready';
     }
 
     if (msg.type === 'life_lost') {
       if (msg.target && msg.target !== myPlayerId) return;
+      stageState.shakeTimer = 0.55;
+      stageState.shakeIntensity = 11;
+      stageState.surgeTimer = 0.9;
+      stageState.targetCauldronColor = [235, 65, 65];
+      spawnCauldronSplash([235, 65, 65], 30);
+      stageState.raziBubbleText = 'Eyvah! Yanlış malzeme kazana düştü, dikkat et!';
+      stageState.raziBubbleTimer = 2.5;
+
       if (msg.lives !== undefined) {
         updateLives(msg.lives);
         const lostFlask = document.getElementById('flask' + (msg.lives + 1));
@@ -3167,9 +4697,18 @@
     }
 
     if (msg.type === 'game_over') {
+      clearFallbackStepTimers();
       updateLives(0);
       updateCombo(0);
-      recipeBanner.classList.add('hidden');
+      stageState.shakeTimer = 0.8;
+      stageState.shakeIntensity = 14;
+      stageState.surgeTimer = 1.4;
+      stageState.targetCauldronColor = [235, 50, 50];
+      spawnCauldronSplash([235, 50, 50], 45);
+      stageState.phaseLabel = '💥 Kazan Taştı!';
+      stageState.raziBubbleText = msg.message || 'Kazan taştı! Pes etme çırak, yeniden dene.';
+      stageState.raziBubbleTimer = 4.0;
+
       statusEl.textContent = `Oyun bitti: ${msg.message || 'Kazan taştı.'}`;
       statusEl.className   = 'status error';
       gridEl.classList.add('disabled');
@@ -3178,25 +4717,30 @@
       playFlaskCrack();
       if (navigator.vibrate) navigator.vibrate([80, 40, 80, 40, 200]);
 
-      // Oyun sonu özet modalını aç
       lastGameOverLvl = msg.level || 1;
       lastGameOverCombo = msg.max_combo || 0;
       summaryLevel.textContent = lastGameOverLvl.toString().padStart(2, '0');
       summaryTitle.textContent = getAlchemicalTitle(lastGameOverLvl);
       summaryCombo.textContent = lastGameOverCombo >= 2 ? `🔥 x${lastGameOverCombo}` : '—';
       summaryElements.textContent = `${getSavedDiscovered().length}/30`;
-      playerNickname.value = localStorage.getItem('razi_nickname') || '';
+      const savedNick = localStorage.getItem('razi_nickname') || '';
+      playerNickname.value = savedNick;
       saveStatusMsg.textContent = '';
+      if (bannerPlayerNickname) bannerPlayerNickname.value = savedNick;
+      if (bannerSaveStatusMsg) bannerSaveStatusMsg.textContent = '';
+      if (bannerScoreBadge) {
+        bannerScoreBadge.textContent = `SEVİYE ${lastGameOverLvl.toString().padStart(2, '0')}${lastGameOverCombo >= 2 ? (' · 🔥 x' + lastGameOverCombo) : ''}`;
+      }
+      loadScoreDashboardData();
       gameOverModal.classList.remove('hidden');
 
-      // Oyun bittiğinde doğrudan kulüp & künye modalını aç
       openCredits(true);
     }
-  });
+  }
 
   resetBtn.addEventListener('click', () => {
     if (navigator.vibrate) navigator.vibrate(18);
-    if (socket.readyState === WebSocket.OPEN) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ button: 'reset', player_id: myPlayerId }));
     }
     resetBtn.classList.remove('visible');
@@ -3204,6 +4748,22 @@
     if (creditsModal) creditsModal.classList.add('hidden');
     stopCreditsScroll();
   });
+
+  // ── Başlangıç Durumu: QR Okutulduğunda Doğrudan Oyun Modu Seçim Ekranını Göster ──
+  const urlParams = new URLSearchParams(location.search);
+  const queryRoom = (urlParams.get('room') || '').trim().toUpperCase();
+  const queryMode = (urlParams.get('mode') || '').trim().toLowerCase();
+
+  if (queryRoom && (queryMode === 'single' || queryMode === 'duel')) {
+    if (modeSelectModal) modeSelectModal.classList.add('hidden');
+    connectToRoom(queryRoom, queryMode);
+  } else if (queryMode === 'single' || queryMode === 'duel') {
+    requestMatchmaking(queryMode);
+  } else {
+    // QR okutulduğunda (ister /play ister /play/ODA_KODU olsun) her zaman önce Mod Seçimi açılır!
+    if (modeSelectModal) modeSelectModal.classList.remove('hidden');
+    statusEl.textContent = 'Oyun modunu seçin: Tek Kişilik Macera veya 1v1 Çırak Düellosu!';
+  }
 </script>
 </body>
 </html>

@@ -6,7 +6,10 @@ import math
 import os
 import queue
 import random
+import re
 import socket
+import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -14,6 +17,12 @@ import urllib.request as _urllib
 import webbrowser
 from enum import Enum, auto
 from pathlib import Path
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 import pygame
 import qrcode
@@ -1262,7 +1271,7 @@ class Game:
 
     def _make_qr(self) -> pygame.Surface:
         import io
-        img = qrcode.make(f"{PLAY_URL}/{self.room_id}").convert("RGB")
+        img = qrcode.make(f"{PLAY_URL}").convert("RGB")
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         buf.seek(0)
@@ -1345,11 +1354,11 @@ class Game:
     def _handle_mouse_click(self, pos: tuple[int, int]) -> None:
         x, y = pos
         if self.state == GameState.MODE_SELECT:
-            # Kart 1: Tek Kişilik Macera (90, 160, 430, 390)
-            if 90 <= x <= 520 and 160 <= y <= 550:
+            # Kart 1: Tek Kişilik Macera (34, 135, 345, 425)
+            if 34 <= x <= 379 and 135 <= y <= 560:
                 self._select_mode(GameMode.SINGLE)
-            # Kart 2: 1v1 Çırak Düellosu (580, 160, 430, 390)
-            elif 580 <= x <= 1010 and 160 <= y <= 550:
+            # Kart 2: 1v1 Çırak Düellosu (721, 135, 345, 425)
+            elif 721 <= x <= 1066 and 135 <= y <= 560:
                 self._select_mode(GameMode.DUEL)
             # Alt bar: Kulüp & Künye Butonu
             elif (WIDTH // 2 - 200) <= x <= (WIDTH // 2 + 200) and 580 <= y <= 626:
@@ -4074,72 +4083,89 @@ class Game:
         mouse_pos = pygame.mouse.get_pos()
 
         # Başlık ve Üst Panel
-        self._text_shadow("TABÎB EKMELEDDİN'İN KAZANI", self.font_title, GOLD_LT, (WIDTH // 2 - 270, 48))
-        self._text_center("Kadim Tıp ve Simya Mirası · Bir Hafıza ve Dikkat Oyunu", self.font_body, TEXT_DIM, WIDTH // 2, 86)
-        self._draw_separator(80, 118, WIDTH - 80)
+        self._text_shadow("TABÎB EKMELEDDİN'İN KAZANI", self.font_title, GOLD_LT, (WIDTH // 2 - 270, 40))
+        self._text_center("QR Kodu Telefonunla Okut — Modunu Seç ve Tamamen Telefonundan Oyna!", self.font_body_bold, GOLD, WIDTH // 2, 80)
+        self._draw_separator(40, 112, WIDTH - 40)
 
-        # Kart 1: Tek Kişilik Macera (x=90, y=145, w=430, h=410)
-        c1 = pygame.Rect(90, 145, 430, 410)
+        # Kart 1: Tek Kişilik Macera (x=34, y=135, w=345, h=425)
+        c1 = pygame.Rect(34, 135, 345, 425)
         c1_hover = c1.collidepoint(mouse_pos)
         self._draw_panel(c1, radius=16)
         pygame.draw.rect(self.pixel_surface, GOLD_LT if c1_hover else BORDER, c1, 3 if c1_hover else 2, border_radius=16)
 
-        # Kart 1 İçerik
-        self._text_center("[MACERA]", self.font_medium, GOLD if c1_hover else TEXT_DIM, c1.centerx, c1.y + 28)
-        self._text_center("TEK KİŞİLİK MACERA", self.font_medium, GOLD_LT, c1.centerx, c1.y + 68)
-        self._text_center("100 Seviyeli Kadim İksir Yolculuğu", self.font_body_bold, TEXT, c1.centerx, c1.y + 98)
-        self._draw_separator(c1.x + 30, c1.y + 128, c1.right - 30)
+        self._text_center("[MACERA]", self.font_small, GOLD if c1_hover else TEXT_DIM, c1.centerx, c1.y + 22)
+        self._text_center("TEK KİŞİLİK MACERA", self.font_medium, GOLD_LT, c1.centerx, c1.y + 52)
+        self._text_center("100 Seviyeli İksir Yolculuğu", self.font_body_bold, TEXT, c1.centerx, c1.y + 82)
+        self._draw_separator(c1.x + 20, c1.y + 112, c1.right - 20)
 
         c1_bullets = [
-            "• 1 Oyuncu (Mobil cihazla kumanda)",
-            "• 3 İksir şişesi (can) kırılma hakkı",
-            "• 30 Simya cevheri & Tarihi reçeteler",
-            "• Her 3 elementte bir artan süre ve kombo",
-            "• Bey Hekim'in talimatlarını dinle ve başla!",
+            "• 1 Oyuncu (Telefon ekranında)",
+            "• Tüm animasyonlar telefonunda",
+            "• 3 İksir şişesi (can) hakkı",
+            "• 30 Simya cevheri & Reçeteler",
+            "• Sabuncuoğlu Tersine Sıra sınavı",
         ]
-        by = c1.y + 144
+        by = c1.y + 130
         for b in c1_bullets:
-            self._text(b, self.font_body, TEXT if c1_hover else TEXT_DIM, (c1.x + 32, by))
+            self._text(b, self.font_body, TEXT if c1_hover else TEXT_DIM, (c1.x + 20, by))
             by += 32
 
-        # Kart 1 Buton
-        btn1 = pygame.Rect(c1.x + 30, c1.bottom - 64, c1.width - 60, 44)
+        btn1 = pygame.Rect(c1.x + 20, c1.bottom - 58, c1.width - 40, 40)
         self._draw_panel(btn1, radius=10)
         pygame.draw.rect(self.pixel_surface, GOLD if c1_hover else GREEN, btn1, 2, border_radius=10)
-        self._text_center("1 Tuşu veya TIKLA: BAŞLAT", self.font_body_bold, GOLD_LT if c1_hover else GREEN_LT, btn1.centerx, btn1.y + 12)
+        self._text_center("Telefondan veya 1 Tuşu ile", self.font_body_bold, GOLD_LT if c1_hover else GREEN_LT, btn1.centerx, btn1.y + 10)
 
-        # Kart 2: 1v1 Çırak Düellosu (x=580, y=145, w=430, h=410)
-        c2 = pygame.Rect(580, 145, 430, 410)
+        # Orta Panel: Doğrudan Mobil Oyun QR Kodu (x=395, y=135, w=310, h=425)
+        c_qr = pygame.Rect(395, 135, 310, 425)
+        self._draw_panel(c_qr, radius=16)
+        pygame.draw.rect(self.pixel_surface, GOLD, c_qr, 3, border_radius=16)
+        self._text_center("TELEFONDAN OYNA", self.font_medium, GOLD_LT, c_qr.centerx, c_qr.y + 18)
+        self._text_center("Kamerayla QR Kodu Okutun", self.font_body, TEXT_DIM, c_qr.centerx, c_qr.y + 44)
+
+        qr_size = 248
+        qr_scaled = pygame.transform.scale(self.qr_surface, (qr_size, qr_size))
+        qr_x = c_qr.centerx - qr_size // 2
+        qr_y = c_qr.y + 74
+        pygame.draw.rect(self.pixel_surface, (248, 248, 248), (qr_x - 8, qr_y - 8, qr_size + 16, qr_size + 16), border_radius=10)
+        self.pixel_surface.blit(qr_scaled, (qr_x, qr_y))
+
+        if IS_TUNNEL:
+            self._text_center("4.5G / 5G / Wi-Fi AÇIK", self.font_small, GREEN_LT, c_qr.centerx, qr_y + qr_size + 18)
+        else:
+            self._text_center("YEREL AĞ (Wi-Fi)", self.font_small, GOLD, c_qr.centerx, qr_y + qr_size + 18)
+        self._text_center(f"{PLAY_URL}"[:38], self.font_tiny, TEXT_DIM, c_qr.centerx, qr_y + qr_size + 42)
+        self._text_center("Mod seçimi telefonunda açılır!", self.font_body_bold, GOLD_LT, c_qr.centerx, c_qr.bottom - 34)
+
+        # Kart 2: 1v1 Çırak Düellosu (x=721, y=135, w=345, h=425)
+        c2 = pygame.Rect(721, 135, 345, 425)
         c2_hover = c2.collidepoint(mouse_pos)
         self._draw_panel(c2, radius=16)
         pygame.draw.rect(self.pixel_surface, GOLD_LT if c2_hover else BORDER, c2, 3 if c2_hover else 2, border_radius=16)
 
-        # Kart 2 İçerik
-        self._text_center("[DÜELLO]", self.font_medium, GOLD if c2_hover else TEXT_DIM, c2.centerx, c2.y + 28)
-        self._text_center("1v1 ÇIRAK DÜELLOSU", self.font_medium, GOLD_LT, c2.centerx, c2.y + 68)
-        self._text_center("İki Simyacının Canlı Hız & Hafıza Yarışı", self.font_body_bold, TEXT, c2.centerx, c2.y + 98)
-        self._draw_separator(c2.x + 30, c2.y + 128, c2.right - 30)
+        self._text_center("[DÜELLO]", self.font_small, GOLD if c2_hover else TEXT_DIM, c2.centerx, c2.y + 22)
+        self._text_center("1v1 ÇIRAK DÜELLOSU", self.font_medium, GOLD_LT, c2.centerx, c2.y + 52)
+        self._text_center("İki Telefonla Canlı Düello", self.font_body_bold, TEXT, c2.centerx, c2.y + 82)
+        self._draw_separator(c2.x + 20, c2.y + 112, c2.right - 20)
 
         c2_bullets = [
-            "• 2 Oyuncu (2 Ayrı mobil cihaz kumandası)",
-            "• Canlı & eşzamanlı hafıza düellosu",
-            "• İlk 3 raundu (yıldızı) kazanan şampiyon",
-            "• Yanlış malzeme seçiminde 1.2s sersemleme",
-            "• Konya Dârüşşifası'nın yeni baş hekimi belirlensin!",
+            "• 2 Oyuncu (2 Ayrı telefon)",
+            "• İki oyuncu da QR okutur",
+            "• Eşzamanlı hız & hafıza yarışı",
+            "• Yanlış seçimde 1.2s sersemleme",
+            "• 3 canını koruyan şampiyon olur!",
         ]
-        by2 = c2.y + 144
+        by2 = c2.y + 130
         for b in c2_bullets:
-            self._text(b, self.font_body, TEXT if c2_hover else TEXT_DIM, (c2.x + 32, by2))
+            self._text(b, self.font_body, TEXT if c2_hover else TEXT_DIM, (c2.x + 20, by2))
             by2 += 32
 
-        # Kart 2 Buton
-        btn2 = pygame.Rect(c2.x + 30, c2.bottom - 64, c2.width - 60, 44)
+        btn2 = pygame.Rect(c2.x + 20, c2.bottom - 58, c2.width - 40, 40)
         self._draw_panel(btn2, radius=10)
         pygame.draw.rect(self.pixel_surface, GOLD if c2_hover else GREEN, btn2, 2, border_radius=10)
-        self._text_center("2 Tuşu veya TIKLA: BAŞLAT", self.font_body_bold, GOLD_LT if c2_hover else GREEN_LT, btn2.centerx, btn2.y + 12)
+        self._text_center("Telefondan veya 2 Tuşu ile", self.font_body_bold, GOLD_LT if c2_hover else GREEN_LT, btn2.centerx, btn2.y + 10)
 
         # Alt Bar: Kulüp & Künye Butonu & Çıkış
-        self._draw_separator(80, 574, WIDTH - 80)
+        self._draw_separator(40, 574, WIDTH - 40)
         btn_credits = pygame.Rect(WIDTH // 2 - 200, 588, 400, 44)
         cred_hover = btn_credits.collidepoint(mouse_pos)
         self._draw_panel(btn_credits, radius=10)
@@ -4473,5 +4499,128 @@ class Game:
         return surface
 
 
+def _auto_start_services_if_needed() -> tuple[subprocess.Popen | None, subprocess.Popen | None]:
+    """desktop_game.py doğrudan çalıştırıldığında server.py ve cloudflared.exe'yi otomatik başlatır."""
+    global PLAY_URL, IS_TUNNEL, BASE_URL
+    if os.environ.get("RAZI_MANAGED_TUNNEL") == "1":
+        return None, None
+
+    base_dir = Path(__file__).parent.resolve()
+    venv_py = base_dir / ".venv" / "Scripts" / "python.exe"
+    py_bin = str(venv_py if venv_py.exists() else sys.executable)
+    server_proc: subprocess.Popen | None = None
+    tunnel_proc: subprocess.Popen | None = None
+
+    def _server_ok() -> bool:
+        try:
+            req = _urllib.Request(f"http://127.0.0.1:{PORT}/health", headers={"User-Agent": "BeyHekimDesktop"})
+            with _urllib.urlopen(req, timeout=1.0) as resp:
+                return resp.status == 200
+        except Exception:
+            return False
+
+    child_env = os.environ.copy()
+    child_env["PYTHONIOENCODING"] = "utf-8"
+    child_env["PYTHONUTF8"] = "1"
+    child_env["RAZI_MANAGED_TUNNEL"] = "1"
+
+    if not _server_ok():
+        print("[AĞ] Yerel sunucu (server.py) otomatik başlatılıyor...")
+        server_proc = subprocess.Popen(
+            [py_bin, "server.py"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env=child_env,
+            cwd=str(base_dir),
+        )
+        for _ in range(25):
+            if _server_ok():
+                break
+            time.sleep(0.25)
+
+    cf_bin = base_dir / "cloudflared.exe"
+    if not IS_TUNNEL and cf_bin.exists():
+        print("[AĞ] Cloudflare güvenli internet tüneli otomatik açılıyor...")
+        log_file = base_dir / "cloudflared.log"
+        url_pattern = re.compile(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com")
+        for proto in ("http2", None):
+            try:
+                log_file.write_text("", encoding="utf-8")
+            except Exception:
+                pass
+            cmd = [str(cf_bin), "tunnel", "--url", f"http://127.0.0.1:{PORT}", "--logfile", str(log_file)]
+            if proto:
+                cmd.extend(["--protocol", proto])
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                bufsize=1,
+                cwd=str(base_dir),
+            )
+            found: list[str] = []
+
+            def _drain(p=proc, out=found) -> None:
+                if not p.stdout:
+                    return
+                try:
+                    for line in p.stdout:
+                        if not out:
+                            m = url_pattern.search(line)
+                            if m:
+                                out.append(m.group(0))
+                except Exception:
+                    pass
+
+            threading.Thread(target=_drain, daemon=True).start()
+            t0 = time.time()
+            while time.time() - t0 < 15.0:
+                if found:
+                    break
+                if log_file.exists():
+                    try:
+                        m = url_pattern.search(log_file.read_text(encoding="utf-8", errors="ignore"))
+                        if m:
+                            found.append(m.group(0))
+                            break
+                    except Exception:
+                        pass
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.25)
+
+            if found:
+                tunnel_proc = proc
+                PLAY_URL = f"{found[0]}/play"
+                IS_TUNNEL = True
+                BASE_URL = found[0]
+                os.environ["RAZI_PLAY_URL"] = PLAY_URL
+                print(f"[AĞ] Cloudflare Tüneli Hazır: {PLAY_URL}")
+                break
+            else:
+                try:
+                    proc.terminate()
+                except Exception:
+                    pass
+
+    return server_proc, tunnel_proc
+
+
 if __name__ == "__main__":
-    Game().run()
+    _srv_proc, _tun_proc = _auto_start_services_if_needed()
+    try:
+        Game().run()
+    finally:
+        for _p in (_tun_proc, _srv_proc):
+            if _p is not None:
+                try:
+                    _p.terminate()
+                    _p.wait(timeout=2)
+                except Exception:
+                    try:
+                        _p.kill()
+                    except Exception:
+                        pass

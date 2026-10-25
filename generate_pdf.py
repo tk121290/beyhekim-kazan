@@ -32,21 +32,31 @@ C_BORDER = HexColor("#845b2f")
 def register_fonts() -> str:
     """Türkçe karakter destekli sistem fontunu kaydeder."""
     font_candidates = [
-        ("C:/Windows/Fonts/georgia.ttf", "Georgia"),
-        ("C:/Windows/Fonts/arial.ttf", "Arial"),
-        ("C:/Windows/Fonts/segoeui.ttf", "SegoeUI"),
+        ("C:/Windows/Fonts/georgia.ttf", "Georgia", "C:/Windows/Fonts/georgiab.ttf", "C:/Windows/Fonts/georgiai.ttf", "C:/Windows/Fonts/georgiaz.ttf"),
+        ("C:/Windows/Fonts/arial.ttf", "Arial", "C:/Windows/Fonts/arialbd.ttf", "C:/Windows/Fonts/ariali.ttf", "C:/Windows/Fonts/arialbi.ttf"),
+        ("C:/Windows/Fonts/segoeui.ttf", "SegoeUI", "C:/Windows/Fonts/segoeuib.ttf", "C:/Windows/Fonts/segoeuii.ttf", "C:/Windows/Fonts/segoeuiz.ttf"),
     ]
-    for path, name in font_candidates:
+    for path, name, bold_path, italic_path, bi_path in font_candidates:
         if os.path.exists(path):
             try:
                 pdfmetrics.registerFont(TTFont(name, path))
-                bold_path = path.replace(".ttf", "bd.ttf") if "georgia" in path or "arial" in path else path
+                b_name = f"{name}-Bold" if os.path.exists(bold_path) else name
+                i_name = f"{name}-Italic" if os.path.exists(italic_path) else name
+                bi_name = f"{name}-BoldItalic" if os.path.exists(bi_path) else b_name
                 if os.path.exists(bold_path):
-                    pdfmetrics.registerFont(TTFont(f"{name}-Bold", bold_path))
+                    pdfmetrics.registerFont(TTFont(b_name, bold_path))
+                if os.path.exists(italic_path):
+                    pdfmetrics.registerFont(TTFont(i_name, italic_path))
+                if os.path.exists(bi_path):
+                    pdfmetrics.registerFont(TTFont(bi_name, bi_path))
+                pdfmetrics.registerFontFamily(name, normal=name, bold=b_name, italic=i_name, boldItalic=bi_name)
                 return name
             except Exception:
                 pass
     return "Helvetica"
+
+
+_ACTIVE_FONT = "Helvetica"
 
 
 def draw_background_and_border(canvas, doc):
@@ -83,17 +93,19 @@ def draw_background_and_border(canvas, doc):
         canvas.setLineWidth(0.8)
         canvas.circle(x, y, 1.8 * mm, stroke=1, fill=0)
 
-    # Sayfa ve alt bilgi
-    canvas.setFont("Helvetica", 8)
+    # Sayfa ve alt bilgi (Türkçe font destekli)
+    canvas.setFont(_ACTIVE_FONT, 8)
     canvas.setFillColor(C_MUTED)
-    footer_text = f"Tabîb Ekmeleddin'in Kazanı · ERÜ Anadolu Tıp Tarihi Topluluğu — Sayfa {doc.page}"
+    footer_text = f"Tabîb Ekmeleddin'in Kazanı · ERÜ Anadolu Tıp Tarihi Kulübü Gürgen Ekibi — Sayfa {doc.page}"
     canvas.drawCentredString(w / 2.0, 7 * mm, footer_text)
 
     canvas.restoreState()
 
 
 def build_pdf() -> Path:
+    global _ACTIVE_FONT
     font_name = register_fonts()
+    _ACTIVE_FONT = font_name
     font_bold = f"{font_name}-Bold" if f"{font_name}-Bold" in pdfmetrics.getRegisteredFontNames() else font_name
 
     OUTPUT_PDF.parent.mkdir(parents=True, exist_ok=True)
