@@ -1874,11 +1874,12 @@ async def home(request: Request) -> HTMLResponse:
           • <strong>Akademik Başkan Yardımcısı:</strong> Tahsin Efe KARAKÖSE<br>
           • <strong>Faaliyet Sorumlusu:</strong> Banu Ece PÜSKÜLLÜOĞLU<br>
           • <strong>Eğitim Sorumlusu:</strong> Baran PEKDOĞAN<br>
-          • <strong>Gürgen Grubu Yöneticisi:</strong> Ahmet Yasin MARŞİL
+          • <strong>Gürgen Grubu Yöneticisi:</strong> Ahmet Yasin MARŞİL<br>
+          • <strong>Dergi Direktörü:</strong> Fatıma Zehra KARAKAYA
         </div>
         <div style="background:#140d08; border:1px solid var(--border); border-radius:10px; padding:12px;">
           <strong style="color:var(--gold-lt); display:block; margin-bottom:4px;">🌟 KATKI, SOSYAL MEDYA VE DENETİM EKİBİ</strong>
-          • <strong>Katkı ve Destek:</strong> Mustafa Safa ŞENBAK, Yusuf Efe BAYRAKTAR, Muhammed Serhat TURSUN<br>
+          • <strong>Katkı ve Destek:</strong> Mustafa Safa ŞENBAK, Yusuf Efe BAYRAKTAR, Muhammed Serhat TURSUN, Fatıma Zehra KARAKAYA<br>
           • <strong>Sosyal Medya Ekibi:</strong> Mina ALKAÇ, Muhammet Serhat TURSUN<br>
           • <strong>Denetleme Kurulu:</strong> Zişan ÇELİK, Nehir BÜYÜKDOĞAN
         </div>

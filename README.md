@@ -75,7 +75,7 @@ py desktop_game.py
 - **Proje Yöneticisi:** Tahsin Efe KARAKÖSE
 - **Web Sunucusu, Hosting & Debug:** Ahmet Yasin MARŞİL
 - **Tasarım Destek:** Mürsel Musa İLBASMIŞ, Baran PEKDOĞAN
-- **Teşekkür:** Mustafa Safa ŞENBAK, Yusuf Efe BAYRAKTAR, Muhammed Serhat TURSUN
+- **Teşekkür:** Mustafa Safa ŞENBAK, Yusuf Efe BAYRAKTAR, Muhammed Serhat TURSUN, Fatıma Zehra KARAKAYA
 
 ### 👑 Anadolu Tıp Yönetimi
 - **Başkan:** Mustafa Safa ŞENBAK
@@ -84,6 +84,7 @@ py desktop_game.py
 - **Faaliyet Sorumlusu:** Banu Ece PÜSKÜLLÜOĞLU
 - **Eğitim Sorumlusu:** Baran PEKDOĞAN
 - **Gürgen Grubu Yöneticisi:** Ahmet Yasin MARŞİL
+- **Dergi Direktörü:** Fatıma Zehra KARAKAYA
 - **Sosyal Medya Ekibi:** Mina ALKAÇ, Muhammet Serhat TURSUN
 - **Denetleme Ekibi:** Zişan ÇELİK, Nehir BÜYÜKDOĞAN
 

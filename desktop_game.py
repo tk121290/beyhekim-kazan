@@ -233,6 +233,7 @@ CREDITS_ROLL_DATA = [
             "Mustafa Safa ŞENBAK",
             "Yusuf Efe BAYRAKTAR",
             "Muhammed Serhat TURSUN",
+            "Fatıma Zehra KARAKAYA",
         ]
     },
     {
@@ -246,6 +247,7 @@ CREDITS_ROLL_DATA = [
             "Faaliyet Sorumlusu: Banu Ece PÜSKÜLLÜOĞLU",
             "Eğitim Sorumlusu: Baran PEKDOĞAN",
             "Gürgen Grubu Yöneticisi: Ahmet Yasin MARŞİL",
+            "Dergi Direktörü: Fatıma Zehra KARAKAYA",
         ]
     },
     {
